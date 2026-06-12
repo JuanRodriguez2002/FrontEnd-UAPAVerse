@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 :root {
-  
+  --font-sora: var(--font-sora);
+  --font-hanken: var(--font-hanken);
+  --font-space: var(--font-space);
 }
 
 @media (prefers-color-scheme: dark) {
