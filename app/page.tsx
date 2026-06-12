@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import {
   Globe,
@@ -12,6 +14,8 @@ import {
   User
 } from "lucide-react";
 import Image from "next/image";
+
+import  NavbarLanding  from "@/app/components/NavbarLanding";
 
 export default function Home() {
   return (
@@ -31,29 +35,8 @@ export default function Home() {
               />
             </div>
           </div>
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#bfc7d3]">
-            <a href="#about" className="hover:text-[#f7f7f7] transition-colors">
-              Explore
-            </a>
-            <a
-              href="#interests"
-              className="hover:text-[#f7f7f7] transition-colors"
-            >
-              About
-            </a>
-            <a
-              href="#mission"
-              className="hover:text-[#f7f7f7] transition-colors"
-            >
-              Mission
-            </a>
-            <a
-              href="/auth/login"
-              className="px-5 py-2 border border-[#98cbff]/30 rounded-full text-[#f7f7f7] hover:bg-[#98cbff]/10 transition-all"
-            >
-              Log in
-            </a>
-          </nav>
+
+          <NavbarLanding />
 
           <div className="flex items-center gap-2 text-blue-400" >
             <Bot/>
