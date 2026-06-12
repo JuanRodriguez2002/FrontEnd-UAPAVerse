@@ -48,7 +48,7 @@ export default function Home() {
               Mission
             </a>
             <a
-              href="/login"
+              href="/auth/login"
               className="px-5 py-2 border border-[#98cbff]/30 rounded-full text-[#f7f7f7] hover:bg-[#98cbff]/10 transition-all"
             >
               Log in
