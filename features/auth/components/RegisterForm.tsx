@@ -37,21 +37,20 @@ export default function RegistrationPage() {
       
       {/* Navbar */}
       <header className="border-b border-gray-800/60 backdrop-blur-md bg-[#030712]/50 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between 
+        rounded-full border border-blue-500/20 shadow-lg shadow-blue-950/20">
           <div className="flex items-center gap-3">
-            <div className="relative w-12 h-12">
+            <div className="relative w-20 h-20">
               <Image 
                 src="/images/image.png"  
                 alt="UAPA VERSE Logo" 
                 fill
                 className="object-contain"
                 priority
-                //width={300} 
-                //height={300}
               />
             </div>
             <span className="text-xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">
-              UAPA VERSE
+              
             </span>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
