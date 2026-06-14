@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Sora, Hanken_Grotesk, Space_Grotesk } from "next/font/google";
 import "./globals.css";
-
 // 1. Cargamos Sora para los titulares (Headlines)
 const sora = Sora({
   subsets: ["latin"],
