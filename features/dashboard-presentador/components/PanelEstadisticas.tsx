@@ -2,27 +2,31 @@
 
 import React, { useState } from 'react';
 
+const wavePath = (points: Array<[number, number]>) => {
+  if (!points.length) return '';
+  return points.slice(1).reduce((path, [x, y], i) => {
+    const [prevX, prevY] = points[i];
+    const mid = (x - prevX) / 2;
+    return `${path} C ${prevX + mid} ${prevY}, ${x - mid} ${y}, ${x} ${y}`;
+  }, `M ${points[0][0]} ${points[0][1]}`);
+};
+
 export default function PanelEstadisticas() {
-  const [propuestas, setPropuestas] = useState([
-    { id: '1', empresa: 'Nexus Capital', tipo: 'Inversión Directa', estado: 'pendiente' },
-    { id: '2', empresa: 'Alpha Industries', tipo: 'Acuerdo de Transferencia', estado: 'pendiente' },
-    { id: '3', empresa: 'TechVentures SA', tipo: 'Alianza Estratégica', estado: 'pendiente' },
-  ]);
-
   const [vistaGrafico, setVistaGrafico] = useState<'semana' | 'mes'>('semana');
-
-  const accionarPropuesta = (id: string, decision: 'aceptada' | 'declinada') => {
-    setPropuestas(prev => prev.map(p => p.id === id ? { ...p, estado: decision } : p));
-  };
+  const [propuestas, setPropuestas] = useState([
+    { id: '1', empresa: 'Nexus Capital', tipo: 'Inversion directa', estado: 'pendiente' },
+    { id: '2', empresa: 'Alpha Industries', tipo: 'Acuerdo de transferencia', estado: 'pendiente' },
+    { id: '3', empresa: 'TechVentures SA', tipo: 'Alianza estrategica', estado: 'pendiente' },
+  ]);
 
   const datosGrafico = {
     semana: [
       { label: 'Lun', visitas: 38, empresas: 5 },
       { label: 'Mar', visitas: 72, empresas: 12 },
-      { label: 'Mié', visitas: 55, empresas: 8 },
+      { label: 'Mie', visitas: 55, empresas: 8 },
       { label: 'Jue', visitas: 91, empresas: 17 },
       { label: 'Vie', visitas: 64, empresas: 10 },
-      { label: 'Sáb', visitas: 28, empresas: 3 },
+      { label: 'Sab', visitas: 28, empresas: 3 },
       { label: 'Dom', visitas: 19, empresas: 2 },
     ],
     mes: [
@@ -35,331 +39,860 @@ export default function PanelEstadisticas() {
 
   const datos = datosGrafico[vistaGrafico];
   const maxVisitas = Math.max(...datos.map(d => d.visitas));
+  const maxEmpresas = Math.max(...datos.map(d => d.empresas));
+  const propuestasPendientes = propuestas.filter(p => p.estado === 'pendiente').length;
+  const empresaPoints = datos
+    .map((d, i) => {
+      const x = datos.length === 1 ? 0 : 40 + (i / (datos.length - 1)) * 860;
+      const y = 245 - (d.empresas / maxEmpresas) * 165;
+      return [x, y] as [number, number];
+    });
+  const visitPoints = datos
+    .map((d, i) => {
+      const x = datos.length === 1 ? 0 : 40 + (i / (datos.length - 1)) * 860;
+      const y = 252 - (d.visitas / maxVisitas) * 178;
+      return [x, y] as [number, number];
+    });
+  const visitWavePath = wavePath(visitPoints);
+  const empresaWavePath = wavePath(empresaPoints);
+  const visitAreaPath = `${visitWavePath} L 900 270 L 40 270 Z`;
 
   const empresasInteresadas = [
     { nombre: 'Nexus Capital', sector: 'Fintech', visitas: 14, interes: 'Alto', color: '#34d399' },
     { nombre: 'Alpha Industries', sector: 'Manufactura', visitas: 9, interes: 'Medio', color: '#fbbf24' },
     { nombre: 'TechVentures SA', sector: 'Deep Tech', visitas: 7, interes: 'Alto', color: '#34d399' },
     { nombre: 'GlobalSeed Fund', sector: 'Capital de Riesgo', visitas: 5, interes: 'Medio', color: '#fbbf24' },
-    { nombre: 'Innova Corp', sector: 'Consultoría', visitas: 3, interes: 'Bajo', color: 'rgba(255,255,255,0.3)' },
+    { nombre: 'Innova Corp', sector: 'Consultoria', visitas: 3, interes: 'Bajo', color: 'rgba(255,255,255,0.38)' },
   ];
 
-  const propuestasPendientes = propuestas.filter(p => p.estado === 'pendiente').length;
+  const fuentesTrafico = [
+    { canal: 'Lobby principal', pct: 42, color: '#67e8f9' },
+    { canal: 'Buscador interno', pct: 26, color: '#a78bfa' },
+    { canal: 'Agenda de demos', pct: 19, color: '#f0abfc' },
+    { canal: 'Invitaciones', pct: 13, color: '#34d399' },
+  ];
 
-  const Label = ({ children }: { children: React.ReactNode }) => (
-    <div style={{
-      fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)',
-      letterSpacing: '0.1em', textTransform: 'uppercase' as const, marginBottom: 10,
-    }}>
-      {children}
-    </div>
-  );
+  const zonasStand = [
+    { zona: 'Demo interactiva', visitas: 884, retencion: '5m 12s', estado: 'Fuerte' },
+    { zona: 'Descargas', visitas: 621, retencion: '2m 48s', estado: 'Estable' },
+    { zona: 'Networking', visitas: 513, retencion: '4m 03s', estado: 'Alto' },
+  ];
+
+  const embudo = [
+    { paso: 'Visitantes', valor: 2845, pct: 100 },
+    { paso: 'Interesados', valor: 57, pct: 72 },
+    { paso: 'Contactos', valor: 24, pct: 46 },
+    { paso: 'Propuestas', valor: propuestas.length, pct: 28 },
+  ];
+
+  const objetivos = [
+    { label: 'Meta de visitas', actual: '2,845', meta: '3,500', pct: 81 },
+    { label: 'Meta de empresas', actual: '57', meta: '75', pct: 76 },
+    { label: 'Meta de propuestas', actual: String(propuestas.length), meta: '8', pct: 38 },
+  ];
+
+  const alertas = [
+    { title: 'Alta intencion detectada', text: 'Nexus Capital y TechVentures repitieron visita.', tone: '#34d399' },
+    { title: 'Documentos populares', text: 'El brochure tecnico concentra 41% de descargas.', tone: '#67e8f9' },
+    { title: 'Seguimiento sugerido', text: 'Hay 3 propuestas pendientes por responder.', tone: '#fbbf24' },
+  ];
+
+  const accionarPropuesta = (id: string, decision: 'aceptada' | 'declinada') => {
+    setPropuestas(prev => prev.map(p => (p.id === id ? { ...p, estado: decision } : p)));
+  };
 
   return (
-    <div style={{ background: '#0a0f2e', minHeight: '100vh', display: 'flex', fontFamily: 'sans-serif' }}>
-
-      {/* Sidebar */}
-      <div style={{ width: 190, background: '#080d27', padding: '20px 0', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
-        <div style={{ padding: '0 16px 24px', borderBottom: '0.5px solid rgba(255,255,255,0.08)' }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Presentador</div>
-          <div style={{ fontSize: 10, color: 'rgba(251, 253, 255, 0.35)', letterSpacing: '0.08em' }}>UAPA VERSE</div>
+    <section style={adminPanelSt}>
+      <div style={topbarSt}>
+        <div>
+          <div style={commandLabelSt}>✣ Centro de comando</div>
+          <h2 style={pageTitleSt}>Panel de Estadisticas</h2>
+          <p style={pageSubtitleSt}>Visitas, interes comercial y oportunidades generadas por tu stand.</p>
         </div>
-        <nav style={{ padding: '16px 0', flex: 1 }}>
-          {[
-            { label: 'Publish Stand' },
-            { label: 'My Stands' },
-            { label: 'Results', active: true },
-            { label: 'Messages'},
-            { label: 'Settings'},
-          ].map(item => (
-            <div key={item.label} style={{
-              display: 'flex', alignItems: 'center', gap: 10, padding: '9px 16px',
-              fontSize: 12,
-              color: item.active ? '#fff' : 'rgba(255,255,255,0.45)',
-              background: item.active ? 'rgba(99,102,241,0.18)' : 'transparent',
-              borderLeft: item.active ? '2px solid #6366f1' : '2px solid transparent',
-              cursor: 'pointer',
-            }}>
-              <span>{item.icon}</span> {item.label}
-            </div>
-          ))}
-        </nav>
-        <div style={{ padding: '16px', borderTop: '0.5px solid rgba(255,255,255,0.08)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 0', fontSize: 12, color: 'rgba(255,255,255,0.45)', cursor: 'pointer' }}>
-             Logout
-          </div>
+
+        <div style={topActionsSt}>
+          <label style={searchSt}>
+            <span style={{ color: 'rgba(255,255,255,0.42)', fontSize: 14 }}>⌕</span>
+            <input placeholder="Buscar en reportes..." style={searchInputSt} />
+          </label>
+          <button style={iconButtonSt}>◔</button>
+          <button style={exportButtonSt}>Exportar datos</button>
         </div>
       </div>
 
-      {/* Main */}
-      <div style={{ flex: 1, padding: '28px 28px 28px 24px', overflowY: 'auto' }}>
+      <div style={kpiGridSt}>
+        {[
+          { label: 'Visitas totales', valor: '2,845', badge: '+16% esta semana', icon: '◌', tone: '#67e8f9' },
+          { label: 'Empresas interesadas', valor: '57', badge: '+8 nuevas', icon: '▤', tone: '#34d399' },
+          { label: 'Tiempo promedio', valor: '4m 20s', badge: '+2m al promedio', icon: '◷', tone: '#c084fc' },
+          { label: 'Propuestas recibidas', valor: String(propuestas.length), badge: `${propuestasPendientes} pendientes`, icon: '◇', tone: '#fbbf24' },
+        ].map(kpi => (
+          <article key={kpi.label} style={kpiCardSt}>
+            <div style={kpiIconSt(kpi.tone)}>{kpi.icon}</div>
+            <span style={kpiBadgeSt(kpi.tone)}>{kpi.badge}</span>
+            <div style={kpiLabelSt}>{kpi.label}</div>
+            <div style={kpiValueSt}>{kpi.valor}</div>
+            <div style={periodTextSt}>vs. periodo anterior</div>
+          </article>
+        ))}
+      </div>
 
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
-          <div>
-            <h1 style={{ fontSize: 26, fontWeight: 800, color: '#fff', margin: 0 }}>PANEL DE ESTADISTICAS</h1>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-              Visitas e interés de empresas en tu stand virtual.
-            </p>
+      <div style={mainGridSt}>
+        <article style={analyticsCardSt}>
+          <div style={cardHeaderSt}>
+            <div>
+              <div style={sectionLabelSt}>⌁ Live analytics</div>
+              <h3 style={cardTitleSt}>Visitas al stand</h3>
+              <p style={cardSubtitleSt}>Trafico diario de visitantes y empresas interesadas.</p>
+            </div>
+            <div style={segmentedSt}>
+              {(['semana', 'mes'] as const).map(v => (
+                <button
+                  key={v}
+                  onClick={() => setVistaGrafico(v)}
+                  style={{
+                    ...segmentButtonSt,
+                    background: vistaGrafico === v ? 'rgba(103,232,249,0.16)' : 'transparent',
+                    color: vistaGrafico === v ? '#67e8f9' : 'rgba(255,255,255,0.46)',
+                    borderColor: vistaGrafico === v ? 'rgba(103,232,249,0.35)' : 'transparent',
+                  }}
+                >
+                  {v.charAt(0).toUpperCase() + v.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
-          <button style={{
-            background: 'transparent', border: '0.5px solid rgba(255,255,255,0.25)',
-            color: 'rgba(255,255,255,0.7)', fontSize: 11, padding: '7px 14px',
-            borderRadius: 8, cursor: 'pointer', letterSpacing: '0.05em', fontFamily: 'inherit',
-          }}>
-            EXPORTAR DATOS
-          </button>
-        </div>
 
-        {/* KPIs */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 14 }}>
-          {[
-            { label: 'Visitas Totales al Stand', valor: '2,845', badge: '↑ +16% esta semana', badgeColor: '#34d399', icon: '👁️' },
-            { label: 'Empresas Interesadas', valor: '57', badge: '↑ +8 nuevas', badgeColor: '#34d399', icon: '🏢' },
-            { label: 'Tiempo Promedio en Stand', valor: '4m 20s', badge: '↑ +2m al promedio', badgeColor: '#34d399', icon: '⏱️' },
-            { label: 'Propuestas Recibidas', valor: String(propuestas.length), badge: `${propuestasPendientes} pendientes`, badgeColor: '#a5b4fc', icon: '🤝' },
-          ].map(kpi => (
-            <div key={kpi.label} style={{
-              background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.1)',
-              borderRadius: 14, padding: '16px 18px', position: 'relative',
-            }}>
-              <span style={{ position: 'absolute', top: 14, right: 14, fontSize: 16, opacity: 0.25 }}>{kpi.icon}</span>
-              <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>
-                {kpi.label}
-              </div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', lineHeight: 1 }}>
-                {kpi.valor}
-              </div>
-              <div style={{ fontSize: 10, color: kpi.badgeColor, marginTop: 8 }}>{kpi.badge}</div>
+          <div style={chartWrapSt}>
+            <svg width="100%" height="300" viewBox="0 0 940 300" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0 }}>
+              <defs>
+                <linearGradient id="adminArea" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="rgba(103,232,249,0.42)" />
+                  <stop offset="62%" stopColor="rgba(139,92,246,0.2)" />
+                  <stop offset="100%" stopColor="rgba(6,11,41,0)" />
+                </linearGradient>
+                <linearGradient id="adminLine" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#67e8f9" />
+                  <stop offset="58%" stopColor="#a5b4fc" />
+                  <stop offset="100%" stopColor="#f0abfc" />
+                </linearGradient>
+                <linearGradient id="visitLine" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#34d399" />
+                  <stop offset="55%" stopColor="#67e8f9" />
+                  <stop offset="100%" stopColor="#60a5fa" />
+                </linearGradient>
+                <filter id="adminGlow">
+                  <feGaussianBlur stdDeviation="5" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              {[76, 126, 176, 226, 276].map(y => (
+                <line key={y} x1="0" x2="940" y1={y} y2={y} stroke="rgba(255,255,255,0.07)" strokeDasharray="6 8" />
+              ))}
+              <path d={visitAreaPath} fill="url(#adminArea)" />
+              <path d={visitWavePath} fill="none" stroke="url(#visitLine)" strokeWidth="2.6" filter="url(#adminGlow)" strokeLinecap="round" strokeLinejoin="round" />
+              <path d={empresaWavePath} fill="none" stroke="url(#adminLine)" strokeWidth="2.3" filter="url(#adminGlow)" strokeLinecap="round" strokeLinejoin="round" opacity="0.95" />
+            </svg>
+
+            <div style={axisLayerSt}>
+              {datos.map(d => (
+                <span key={d.label} style={xAxisSt}>{d.label}</span>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
 
-        {/* Fila media */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 14, marginBottom: 14 }}>
+          <div style={legendSt}>
+            <span style={legendItemSt}><i style={legendDotSt('#67e8f9')} />Visitas</span>
+            <span style={legendItemSt}><i style={legendDotSt('#f0abfc')} />Empresas interesadas</span>
+            <span style={legendItemSt}><i style={legendDotSt('#fbbf24')} />Propuestas pendientes</span>
+          </div>
+        </article>
 
-          {/* Gráfico */}
-          <div style={{
-            background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.1)',
-            borderRadius: 14, padding: 20,
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>Visitas al Stand</div>
-                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>Tráfico diario de visitantes</div>
-              </div>
-              <div style={{ display: 'flex', background: 'rgba(255,255,255,0.07)', borderRadius: 6, overflow: 'hidden' }}>
-                {(['semana', 'mes'] as const).map(v => (
-                  <button key={v} onClick={() => setVistaGrafico(v)} style={{
-                    fontSize: 11, padding: '4px 10px', border: 'none', cursor: 'pointer',
-                    background: vistaGrafico === v ? 'rgba(99,102,241,0.5)' : 'transparent',
-                    color: vistaGrafico === v ? '#fff' : 'rgba(255,255,255,0.4)',
-                    fontFamily: 'inherit',
-                  }}>
-                    {v.charAt(0).toUpperCase() + v.slice(1)}
-                  </button>
-                ))}
-              </div>
+        <article style={activityCardSt}>
+          <div style={cardHeaderSt}>
+            <div>
+              <div style={sectionLabelSt}>Actividad reciente</div>
+              <p style={cardSubtitleSt}>Eventos importantes del sistema.</p>
             </div>
+            <span style={livePillSt}>● En vivo</span>
+          </div>
+          <div style={{ display: 'grid', gap: 18, marginTop: 18 }}>
+            {[
+              { icon: '▤', title: 'Nueva empresa interesada', text: 'Nexus Capital visito el stand.', time: 'Hace 4 min', color: '#67e8f9' },
+              { icon: '◇', title: 'Propuesta recibida', text: `${propuestasPendientes} propuestas pendientes de revision.`, time: 'Hace 18 min', color: '#f0abfc' },
+              { icon: '◷', title: 'Tiempo promedio actualizado', text: 'La permanencia subio a 4m 20s.', time: 'Hace 42 min', color: '#34d399' },
+              { icon: '▣', title: 'Pico de actividad registrado', text: '57 empresas interesadas acumuladas.', time: 'Hace 1 h', color: '#fbbf24' },
+              { icon: '⌁', title: 'Zona destacada', text: 'Demo interactiva lidera la retencion.', time: 'Hace 2 h', color: '#a78bfa' },
+            ].map(item => (
+              <div key={item.title} style={activityItemSt}>
+                <div style={activityIconSt(item.color)}>{item.icon}</div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ color: '#fff', fontWeight: 800, fontSize: 12 }}>{item.title}</div>
+                  <div style={activityTextSt}>{item.text}</div>
+                </div>
+                <span style={activityTimeSt}>{item.time}</span>
+              </div>
+            ))}
+          </div>
+        </article>
+      </div>
 
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8, height: 120 }}>
-              {datos.map((d, i) => (
-                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end', gap: 4 }}>
+      <div style={insightGridSt}>
+        <article style={dataCardSt}>
+          <div style={cardHeaderSt}>
+            <div>
+              <div style={sectionLabelSt}>Embudo de conversion</div>
+              <p style={cardSubtitleSt}>Del trafico inicial a propuestas recibidas.</p>
+            </div>
+            <span style={softPillSt}>28% final</span>
+          </div>
+          <div style={{ display: 'grid', gap: 12, marginTop: 18 }}>
+            {embudo.map(item => (
+              <div key={item.paso}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 7 }}>
+                  <span style={{ color: 'rgba(226,232,240,0.68)', fontSize: 12 }}>{item.paso}</span>
+                  <strong style={{ color: '#fff', fontSize: 12 }}>{item.valor.toLocaleString()}</strong>
+                </div>
+                <div style={miniTrackSt}>
                   <div style={{
-                    width: '100%', borderRadius: '5px 5px 0 0',
-                    height: `${Math.round((d.visitas / maxVisitas) * 110)}px`,
-                    background: 'rgba(99,102,241,0.65)',
-                    position: 'relative',
+                    width: `${item.pct}%`,
+                    height: '100%',
+                    borderRadius: 999,
+                    background: 'linear-gradient(90deg,#67e8f9,#a78bfa,#f0abfc)',
+                    boxShadow: '0 0 16px rgba(103,232,249,0.36)',
+                  }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article style={dataCardSt}>
+          <div style={cardHeaderSt}>
+            <div>
+              <div style={sectionLabelSt}>Fuentes de trafico</div>
+              <p style={cardSubtitleSt}>Origen de visitantes dentro del evento.</p>
+            </div>
+            <span style={softPillSt}>4 canales</span>
+          </div>
+          <div style={{ display: 'grid', gap: 14, marginTop: 18 }}>
+            {fuentesTrafico.map(fuente => (
+              <div key={fuente.canal}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 7 }}>
+                  <span style={{ color: 'rgba(226,232,240,0.68)', fontSize: 12 }}>{fuente.canal}</span>
+                  <strong style={{ color: fuente.color, fontSize: 12 }}>{fuente.pct}%</strong>
+                </div>
+                <div style={miniTrackSt}>
+                  <div style={{
+                    width: `${fuente.pct}%`,
+                    height: '100%',
+                    borderRadius: 999,
+                    background: fuente.color,
+                    boxShadow: `0 0 16px ${fuente.color}88`,
+                  }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article style={dataCardSt}>
+          <div style={cardHeaderSt}>
+            <div>
+              <div style={sectionLabelSt}>Rendimiento por zona</div>
+              <p style={cardSubtitleSt}>Secciones del stand con mayor respuesta.</p>
+            </div>
+            <span style={softPillSt}>Top 3</span>
+          </div>
+          <div style={{ display: 'grid', gap: 10, marginTop: 18 }}>
+            {zonasStand.map(zona => (
+              <div key={zona.zona} style={zoneRowSt}>
+                <div>
+                  <div style={{ color: '#fff', fontWeight: 850, fontSize: 12 }}>{zona.zona}</div>
+                  <div style={mutedSt}>{zona.retencion} promedio</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ color: '#67e8f9', fontWeight: 950 }}>{zona.visitas}</div>
+                  <div style={mutedSt}>{zona.estado}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+      </div>
+
+      <div style={bottomGridSt}>
+        <article style={dataCardSt}>
+          <div style={cardHeaderSt}>
+            <div>
+              <div style={sectionLabelSt}>Empresas que visitaron tu stand</div>
+              <p style={cardSubtitleSt}>Lista de visitantes con nivel de interes.</p>
+            </div>
+            <span style={softPillSt}>{empresasInteresadas.length} empresas</span>
+          </div>
+
+          <div style={{ display: 'grid', gap: 10, marginTop: 16 }}>
+            {empresasInteresadas.map(emp => (
+              <div key={emp.nombre} style={companyRowSt}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={avatarSt}>{emp.nombre.charAt(0)}</div>
+                  <div>
+                    <div style={{ color: '#fff', fontWeight: 800, fontSize: 12 }}>{emp.nombre}</div>
+                    <div style={mutedSt}>{emp.sector}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ color: '#fff', fontWeight: 900 }}>{emp.visitas}</div>
+                    <div style={mutedSt}>visitas</div>
+                  </div>
+                  <span style={{
+                    ...statusPillSt,
+                    color: emp.color,
+                    borderColor: `${emp.color}55`,
+                    background: emp.interes === 'Alto' ? 'rgba(52,211,153,0.1)' : emp.interes === 'Medio' ? 'rgba(251,191,36,0.1)' : 'rgba(255,255,255,0.05)',
                   }}>
-                    <div style={{
-                      position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)',
-                      width: 7, height: 7, borderRadius: '50%',
-                      background: '#34d399',
-                      boxShadow: '0 0 5px rgba(52,211,153,0.7)',
-                    }} />
-                  </div>
+                    {emp.interes}
+                  </span>
                 </div>
-              ))}
-            </div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              {datos.map((d, i) => (
-                <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>{d.label}</div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
+        </article>
 
-            <div style={{ display: 'flex', gap: 16, marginTop: 12, paddingTop: 12, borderTop: '0.5px solid rgba(255,255,255,0.07)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(99,102,241,0.65)' }} />
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>Visitas</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#34d399' }} />
-                <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>Empresas interesadas</span>
-              </div>
+        <article style={dataCardSt}>
+          <div style={cardHeaderSt}>
+            <div>
+              <div style={sectionLabelSt}>Propuestas de empresas</div>
+              <p style={cardSubtitleSt}>Gestiona los contactos recibidos.</p>
             </div>
+            <span style={softPillSt}>{propuestasPendientes} activas</span>
           </div>
 
-          {/* Interés por sector */}
-          <div style={{
-            background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.1)',
-            borderRadius: 14, padding: 20,
-          }}>
-            <Label>Interés por sector</Label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {[
-                { sector: 'Capital de Riesgo', pct: 38, color: 'rgba(99,102,241,0.75)' },
-                { sector: 'Deep Tech', pct: 27, color: 'rgba(139,92,246,0.75)' },
-                { sector: 'Manufactura', pct: 20, color: 'rgba(236,72,153,0.65)' },
-                { sector: 'Consultoría', pct: 15, color: 'rgba(99,102,241,0.35)' },
-              ].map(s => (
-                <div key={s.sector}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)' }}>{s.sector}</span>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.75)' }}>{s.pct}%</span>
+          <div style={{ display: 'grid', gap: 10, marginTop: 16 }}>
+            {propuestas.map(prop => (
+              <div key={prop.id} style={proposalSt}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                  <div>
+                    <div style={{ color: '#fff', fontWeight: 800, fontSize: 12 }}>{prop.empresa}</div>
+                    <div style={mutedSt}>{prop.tipo}</div>
                   </div>
-                  <div style={{ height: 5, background: 'rgba(255,255,255,0.07)', borderRadius: 4 }}>
-                    <div style={{ height: '100%', width: `${s.pct}%`, background: s.color, borderRadius: 4 }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Fila inferior */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-
-          {/* Empresas que visitaron */}
-          <div style={{
-            background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.1)',
-            borderRadius: 14, padding: 20,
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <Label>Empresas que visitaron tu stand</Label>
-              <span style={{
-                fontSize: 10, background: 'rgba(99,102,241,0.2)', color: '#a5b4fc',
-                padding: '3px 9px', borderRadius: 6, fontWeight: 600,
-              }}>
-                {empresasInteresadas.length} empresas
-              </span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {empresasInteresadas.map((emp, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '10px 12px',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '0.5px solid rgba(255,255,255,0.07)',
-                  borderRadius: 10,
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{
-                      width: 30, height: 30, borderRadius: 8,
-                      background: 'rgba(99,102,241,0.15)',
-                      border: '0.5px solid rgba(99,102,241,0.25)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 12, color: '#a5b4fc', fontWeight: 700, flexShrink: 0,
-                    }}>
-                      {emp.nombre.charAt(0)}
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: '#fff' }}>{emp.nombre}</div>
-                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>{emp.sector}</div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{emp.visitas}</div>
-                      <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>visitas</div>
-                    </div>
+                  {prop.estado !== 'pendiente' && (
                     <span style={{
-                      fontSize: 10, padding: '2px 8px', borderRadius: 6, fontWeight: 600,
-                      color: emp.color,
-                      background: emp.interes === 'Alto'
-                        ? 'rgba(52,211,153,0.1)'
-                        : emp.interes === 'Medio'
-                          ? 'rgba(251,191,36,0.1)'
-                          : 'rgba(255,255,255,0.05)',
-                      border: `0.5px solid ${emp.color}40`,
+                      ...statusPillSt,
+                      color: prop.estado === 'aceptada' ? '#34d399' : 'rgba(255,255,255,0.46)',
+                      borderColor: prop.estado === 'aceptada' ? 'rgba(52,211,153,0.36)' : 'rgba(255,255,255,0.12)',
                     }}>
-                      {emp.interes}
+                      {prop.estado}
                     </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Propuestas */}
-          <div style={{
-            background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.1)',
-            borderRadius: 14, padding: 20,
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <Label>Propuestas de empresas</Label>
-              <span style={{
-                fontSize: 10, background: 'rgba(99,102,241,0.2)', color: '#a5b4fc',
-                padding: '3px 9px', borderRadius: 6, fontWeight: 600,
-              }}>
-                {propuestasPendientes} activas
-              </span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {propuestas.map(prop => (
-                <div key={prop.id} style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '0.5px solid rgba(255,255,255,0.08)',
-                  borderRadius: 10, padding: '12px 14px',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: prop.estado === 'pendiente' ? 10 : 0 }}>
-                    <div>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: '#fff' }}>{prop.empresa}</div>
-                      <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{prop.tipo}</div>
-                    </div>
-                    {prop.estado !== 'pendiente' && (
-                      <span style={{
-                        fontSize: 10, padding: '2px 8px', borderRadius: 6, fontWeight: 600,
-                        textTransform: 'uppercase' as const,
-                        background: prop.estado === 'aceptada' ? 'rgba(52,211,153,0.12)' : 'rgba(255,255,255,0.06)',
-                        color: prop.estado === 'aceptada' ? '#34d399' : 'rgba(255,255,255,0.35)',
-                        border: prop.estado === 'aceptada' ? '0.5px solid rgba(52,211,153,0.25)' : 'none',
-                      }}>
-                        {prop.estado}
-                      </span>
-                    )}
-                  </div>
-                  {prop.estado === 'pendiente' && (
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <button
-                        onClick={() => accionarPropuesta(prop.id, 'aceptada')}
-                        style={{
-                          flex: 1, padding: '6px 0', background: '#6366f1', color: '#fff',
-                          fontSize: 11, fontWeight: 500, border: 'none', borderRadius: 7,
-                          cursor: 'pointer', fontFamily: 'inherit',
-                        }}
-                      >
-                        Aceptar Contacto
-                      </button>
-                      <button
-                        onClick={() => accionarPropuesta(prop.id, 'declinada')}
-                        style={{
-                          padding: '6px 12px', background: 'transparent',
-                          color: 'rgba(255,255,255,0.4)', fontSize: 11,
-                          border: '0.5px solid rgba(255,255,255,0.12)', borderRadius: 7,
-                          cursor: 'pointer', fontFamily: 'inherit',
-                        }}
-                      >
-                        Declinar
-                      </button>
-                    </div>
                   )}
                 </div>
-              ))}
-            </div>
+                {prop.estado === 'pendiente' && (
+                  <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                    <button onClick={() => accionarPropuesta(prop.id, 'aceptada')} style={primaryButtonSt}>Aceptar contacto</button>
+                    <button onClick={() => accionarPropuesta(prop.id, 'declinada')} style={secondaryButtonSt}>Declinar</button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-
-        </div>
+        </article>
       </div>
-    </div>
+
+      <div style={bottomGridSt}>
+        <article style={dataCardSt}>
+          <div style={cardHeaderSt}>
+            <div>
+              <div style={sectionLabelSt}>Objetivos del evento</div>
+              <p style={cardSubtitleSt}>Progreso frente a las metas definidas.</p>
+            </div>
+            <span style={softPillSt}>Seguimiento</span>
+          </div>
+          <div style={{ display: 'grid', gap: 14, marginTop: 18 }}>
+            {objetivos.map(obj => (
+              <div key={obj.label}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 7 }}>
+                  <span style={{ color: 'rgba(226,232,240,0.68)', fontSize: 12 }}>{obj.label}</span>
+                  <strong style={{ color: '#fff', fontSize: 12 }}>{obj.actual} / {obj.meta}</strong>
+                </div>
+                <div style={miniTrackSt}>
+                  <div style={{
+                    width: `${obj.pct}%`,
+                    height: '100%',
+                    borderRadius: 999,
+                    background: 'linear-gradient(90deg,#34d399,#67e8f9,#a78bfa)',
+                    boxShadow: '0 0 16px rgba(103,232,249,0.32)',
+                  }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article style={dataCardSt}>
+          <div style={cardHeaderSt}>
+            <div>
+              <div style={sectionLabelSt}>Alertas inteligentes</div>
+              <p style={cardSubtitleSt}>Senales relevantes para priorizar acciones.</p>
+            </div>
+            <span style={softPillSt}>3 nuevas</span>
+          </div>
+          <div style={{ display: 'grid', gap: 10, marginTop: 18 }}>
+            {alertas.map(alerta => (
+              <div key={alerta.title} style={alertRowSt(alerta.tone)}>
+                <div style={alertDotSt(alerta.tone)} />
+                <div>
+                  <div style={{ color: '#fff', fontWeight: 850, fontSize: 12 }}>{alerta.title}</div>
+                  <div style={mutedSt}>{alerta.text}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+      </div>
+    </section>
   );
 }
+
+const adminPanelSt: React.CSSProperties = {
+  display: 'grid',
+  gap: 18,
+  color: '#e8eaf6',
+  background:
+    'linear-gradient(rgba(103,232,249,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(103,232,249,0.035) 1px, transparent 1px)',
+  backgroundSize: '38px 38px',
+};
+
+const topbarSt: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  gap: 20,
+  alignItems: 'center',
+  padding: '0 0 18px',
+  borderBottom: '1px solid rgba(103,232,249,0.12)',
+};
+
+const commandLabelSt: React.CSSProperties = {
+  color: '#d8b4fe',
+  fontSize: 11,
+  fontWeight: 900,
+  letterSpacing: '0.16em',
+  textTransform: 'uppercase',
+};
+
+const pageTitleSt: React.CSSProperties = {
+  color: '#fff',
+  margin: '6px 0 2px',
+  fontSize: 28,
+  lineHeight: 1,
+  fontWeight: 950,
+  letterSpacing: '-0.04em',
+};
+
+const pageSubtitleSt: React.CSSProperties = {
+  color: 'rgba(226,232,240,0.62)',
+  margin: 0,
+  fontSize: 13,
+};
+
+const topActionsSt: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
+};
+
+const searchSt: React.CSSProperties = {
+  width: 260,
+  height: 40,
+  display: 'flex',
+  alignItems: 'center',
+  gap: 9,
+  padding: '0 13px',
+  border: '1px solid rgba(148,163,184,0.18)',
+  borderRadius: 12,
+  background: '#0b132b',
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+};
+
+const searchInputSt: React.CSSProperties = {
+  flex: 1,
+  minWidth: 0,
+  background: 'transparent',
+  border: 0,
+  outline: 'none',
+  color: '#fff',
+  fontSize: 12,
+};
+
+const iconButtonSt: React.CSSProperties = {
+  width: 40,
+  height: 40,
+  borderRadius: 12,
+  border: '1px solid rgba(148,163,184,0.18)',
+  background: '#0b132b',
+  color: '#f0abfc',
+  cursor: 'pointer',
+};
+
+const exportButtonSt: React.CSSProperties = {
+  height: 40,
+  padding: '0 15px',
+  borderRadius: 12,
+  border: '1px solid rgba(103,232,249,0.24)',
+  background: 'linear-gradient(135deg, rgba(103,232,249,0.15), rgba(124,58,237,0.18))',
+  color: '#dffbff',
+  fontWeight: 850,
+  fontSize: 12,
+  cursor: 'pointer',
+};
+
+const kpiGridSt: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+  gap: 14,
+};
+
+const kpiCardSt: React.CSSProperties = {
+  position: 'relative',
+  minHeight: 132,
+  padding: '20px 20px 18px',
+  borderRadius: 16,
+  border: '1px solid rgba(103,232,249,0.17)',
+  background: '#0b132b',
+  boxShadow: '0 24px 60px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.06)',
+  overflow: 'hidden',
+};
+
+const kpiIconSt = (tone: string): React.CSSProperties => ({
+  width: 38,
+  height: 38,
+  display: 'grid',
+  placeItems: 'center',
+  borderRadius: 11,
+  color: tone,
+  border: `1px solid ${tone}44`,
+  background: `${tone}14`,
+  boxShadow: `0 0 24px ${tone}18`,
+  marginBottom: 18,
+});
+
+const kpiBadgeSt = (tone: string): React.CSSProperties => ({
+  position: 'absolute',
+  top: 18,
+  right: 18,
+  color: tone,
+  background: `${tone}14`,
+  border: `1px solid ${tone}22`,
+  borderRadius: 999,
+  padding: '4px 8px',
+  fontSize: 10,
+  fontWeight: 850,
+});
+
+const kpiLabelSt: React.CSSProperties = {
+  color: 'rgba(226,232,240,0.62)',
+  fontSize: 12,
+  marginBottom: 7,
+};
+
+const kpiValueSt: React.CSSProperties = {
+  color: '#fff',
+  fontSize: 26,
+  lineHeight: 1,
+  fontWeight: 950,
+  letterSpacing: '-0.03em',
+};
+
+const periodTextSt: React.CSSProperties = {
+  color: 'rgba(148,163,184,0.45)',
+  fontSize: 9,
+  textTransform: 'uppercase',
+  letterSpacing: '0.14em',
+  marginTop: 12,
+};
+
+const mainGridSt: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1.75fr) minmax(300px, 0.85fr)',
+  gap: 16,
+};
+
+const analyticsCardSt: React.CSSProperties = {
+  minHeight: 410,
+  padding: 24,
+  borderRadius: 18,
+  border: '1px solid rgba(103,232,249,0.16)',
+  background: '#0b132b',
+  boxShadow: '0 24px 70px rgba(0,0,0,0.24), inset 0 1px 0 rgba(255,255,255,0.06)',
+  overflow: 'hidden',
+};
+
+const activityCardSt: React.CSSProperties = {
+  ...analyticsCardSt,
+  minHeight: 410,
+};
+
+const cardHeaderSt: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'flex-start',
+  gap: 14,
+};
+
+const sectionLabelSt: React.CSSProperties = {
+  color: '#93c5fd',
+  fontSize: 10,
+  fontWeight: 900,
+  letterSpacing: '0.13em',
+  textTransform: 'uppercase',
+};
+
+const cardTitleSt: React.CSSProperties = {
+  color: '#fff',
+  fontSize: 18,
+  margin: '10px 0 4px',
+  fontWeight: 900,
+};
+
+const cardSubtitleSt: React.CSSProperties = {
+  color: 'rgba(226,232,240,0.54)',
+  fontSize: 12,
+  margin: '4px 0 0',
+};
+
+const segmentedSt: React.CSSProperties = {
+  display: 'flex',
+  padding: 3,
+  borderRadius: 11,
+  background: '#0b132b',
+  border: '1px solid rgba(255,255,255,0.08)',
+};
+
+const segmentButtonSt: React.CSSProperties = {
+  border: '1px solid transparent',
+  borderRadius: 8,
+  padding: '7px 12px',
+  fontSize: 11,
+  fontWeight: 850,
+  cursor: 'pointer',
+};
+
+const chartWrapSt: React.CSSProperties = {
+  position: 'relative',
+  height: 300,
+  marginTop: 22,
+  borderRadius: 14,
+  overflow: 'hidden',
+};
+
+const axisLayerSt: React.CSSProperties = {
+  position: 'absolute',
+  left: 20,
+  right: 20,
+  bottom: 10,
+  display: 'flex',
+  justifyContent: 'space-between',
+  pointerEvents: 'none',
+};
+
+const xAxisSt: React.CSSProperties = {
+  color: 'rgba(226,232,240,0.36)',
+  fontSize: 10,
+  textAlign: 'center',
+};
+
+const legendSt: React.CSSProperties = {
+  display: 'flex',
+  gap: 26,
+  paddingTop: 18,
+  color: 'rgba(226,232,240,0.48)',
+  fontSize: 11,
+};
+
+const legendItemSt: React.CSSProperties = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 7,
+};
+
+const legendDotSt = (color: string): React.CSSProperties => ({
+  width: 7,
+  height: 7,
+  display: 'inline-block',
+  borderRadius: '50%',
+  background: color,
+  boxShadow: `0 0 12px ${color}`,
+});
+
+const livePillSt: React.CSSProperties = {
+  color: '#34d399',
+  fontSize: 10,
+  fontWeight: 900,
+  textTransform: 'uppercase',
+};
+
+const activityItemSt: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '38px minmax(0, 1fr) auto',
+  alignItems: 'center',
+  gap: 12,
+};
+
+const activityIconSt = (color: string): React.CSSProperties => ({
+  width: 36,
+  height: 36,
+  display: 'grid',
+  placeItems: 'center',
+  color,
+  borderRadius: 12,
+  border: `1px solid ${color}33`,
+  background: `${color}12`,
+});
+
+const activityTextSt: React.CSSProperties = {
+  color: 'rgba(226,232,240,0.48)',
+  fontSize: 11,
+  marginTop: 3,
+};
+
+const activityTimeSt: React.CSSProperties = {
+  color: 'rgba(148,163,184,0.42)',
+  fontSize: 9,
+};
+
+const bottomGridSt: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: 16,
+};
+
+const insightGridSt: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+  gap: 16,
+};
+
+const dataCardSt: React.CSSProperties = {
+  padding: 20,
+  borderRadius: 18,
+  border: '1px solid rgba(103,232,249,0.15)',
+  background: '#0b132b',
+  boxShadow: '0 20px 52px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05)',
+};
+
+const softPillSt: React.CSSProperties = {
+  color: '#67e8f9',
+  background: 'rgba(103,232,249,0.1)',
+  border: '1px solid rgba(103,232,249,0.2)',
+  borderRadius: 999,
+  padding: '4px 10px',
+  fontSize: 10,
+  fontWeight: 900,
+};
+
+const companyRowSt: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: 12,
+  padding: '12px 13px',
+  background: '#0b132b',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: 13,
+};
+
+const avatarSt: React.CSSProperties = {
+  width: 36,
+  height: 36,
+  borderRadius: 12,
+  display: 'grid',
+  placeItems: 'center',
+  color: '#e0f2fe',
+  fontWeight: 950,
+  background: '#0b132b',
+  border: '1px solid rgba(103,232,249,0.2)',
+};
+
+const mutedSt: React.CSSProperties = {
+  color: 'rgba(226,232,240,0.43)',
+  fontSize: 11,
+  marginTop: 3,
+};
+
+const miniTrackSt: React.CSSProperties = {
+  height: 8,
+  borderRadius: 999,
+  background: '#0b132b',
+  border: '1px solid rgba(255,255,255,0.04)',
+  overflow: 'hidden',
+};
+
+const zoneRowSt: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  gap: 12,
+  padding: '13px 14px',
+  borderRadius: 13,
+  background: '#0b132b',
+  border: '1px solid rgba(103,232,249,0.1)',
+};
+
+const alertRowSt = (tone: string): React.CSSProperties => ({
+  display: 'grid',
+  gridTemplateColumns: '10px 1fr',
+  gap: 12,
+  alignItems: 'center',
+  padding: '13px 14px',
+  borderRadius: 13,
+  background: `${tone}0D`,
+  border: `1px solid ${tone}22`,
+});
+
+const alertDotSt = (tone: string): React.CSSProperties => ({
+  width: 9,
+  height: 9,
+  borderRadius: '50%',
+  background: tone,
+  boxShadow: `0 0 14px ${tone}`,
+});
+
+const statusPillSt: React.CSSProperties = {
+  fontSize: 10,
+  padding: '4px 9px',
+  borderRadius: 999,
+  fontWeight: 900,
+  border: '1px solid rgba(255,255,255,0.12)',
+};
+
+const proposalSt: React.CSSProperties = {
+  padding: '14px 15px',
+  borderRadius: 13,
+  background: '#0b132b',
+  border: '1px solid rgba(255,255,255,0.08)',
+};
+
+const primaryButtonSt: React.CSSProperties = {
+  flex: 1,
+  padding: '8px 0',
+  background: 'linear-gradient(90deg,#67e8f9,#a78bfa)',
+  color: '#041127',
+  border: 0,
+  borderRadius: 9,
+  fontSize: 11,
+  fontWeight: 950,
+  cursor: 'pointer',
+};
+
+const secondaryButtonSt: React.CSSProperties = {
+  padding: '8px 12px',
+  background: 'transparent',
+  color: 'rgba(226,232,240,0.55)',
+  border: '1px solid rgba(255,255,255,0.12)',
+  borderRadius: 9,
+  fontSize: 11,
+  cursor: 'pointer',
+};
