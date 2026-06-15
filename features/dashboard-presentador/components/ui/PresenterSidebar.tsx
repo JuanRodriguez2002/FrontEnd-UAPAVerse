@@ -1,27 +1,54 @@
 "use client";
 
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import { BarChart3, Inbox, LogOut, MessageSquare, Rocket, Settings, Store, X } from "lucide-react";
 
-export type PresenterSection = "mi-stand" | "mis-stands" | "estadisticas" | "propuestas" | "mensajes" | "configuracion";
+export type PresenterSection =
+  | "mi-stand"
+  | "mis-stands"
+  | "estadisticas"
+  | "propuestas"
+  | "mensajes"
+  | "configuracion";
 
-type PresenterSidebarProps = {
-  active: PresenterSection;
-  open: boolean;
-  onClose: () => void;
-  onSelect: (section: PresenterSection) => void;
+export const SECTION_TO_PATH: Record<PresenterSection, string> = {
+  "mis-stands":    "/dashboard-presentador",
+  "mi-stand":      "/dashboard-presentador/crear-stand",
+  estadisticas:    "/dashboard-presentador/estadisticas",
+  propuestas:      "/dashboard-presentador/propuestas",
+  mensajes:        "/dashboard-presentador/mensajes",
+  configuracion:   "/dashboard-presentador/configuracion",
 };
 
+const PATH_TO_SECTION: Record<string, PresenterSection> = Object.fromEntries(
+  Object.entries(SECTION_TO_PATH).map(([k, v]) => [v, k as PresenterSection])
+);
+
 const NAV: { id: PresenterSection; label: string; Icon: typeof Store }[] = [
-  { id: "mi-stand", label: "Publicar Stand", Icon: Rocket },
-  { id: "mis-stands", label: "Mis Stands", Icon: Store },
-  { id: "estadisticas", label: "Estadísticas", Icon: BarChart3 },
-  { id: "propuestas", label: "Propuestas", Icon: MessageSquare },
-  { id: "mensajes", label: "Mensajes", Icon: Inbox },
-  { id: "configuracion", label: "Settings", Icon: Settings },
+  { id: "mis-stands",    label: "Mis Stands",   Icon: Store },
+  { id: "mi-stand",      label: "Crear Stand",   Icon: Rocket },
+  { id: "estadisticas",  label: "Estadísticas",  Icon: BarChart3 },
+  { id: "propuestas",    label: "Propuestas",    Icon: MessageSquare },
+  { id: "mensajes",      label: "Mensajes",      Icon: Inbox },
+  { id: "configuracion", label: "Settings",      Icon: Settings },
 ];
 
-export function PresenterSidebar({ active, open, onClose, onSelect }: PresenterSidebarProps) {
+type PresenterSidebarProps = {
+  open: boolean;
+  onClose: () => void;
+};
+
+export function PresenterSidebar({ open, onClose }: PresenterSidebarProps) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const active = PATH_TO_SECTION[pathname] ?? "mis-stands";
+
+  function navigate(id: PresenterSection) {
+    router.push(SECTION_TO_PATH[id]);
+    onClose();
+  }
+
   return (
     <>
       {open && (
@@ -74,7 +101,7 @@ export function PresenterSidebar({ active, open, onClose, onSelect }: PresenterS
             <button
               key={id}
               type="button"
-              onClick={() => { onSelect(id); onClose(); }}
+              onClick={() => navigate(id)}
               className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-xl px-3 py-3 text-left text-sm font-semibold transition-all ${
                 active === id
                   ? "border border-primary/25 bg-gradient-to-r from-primary/20 to-secondary/10 text-neon-white shadow-primary-glow"
@@ -84,11 +111,7 @@ export function PresenterSidebar({ active, open, onClose, onSelect }: PresenterS
               {active === id && (
                 <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-primary shadow-[0_0_10px_rgba(152,203,255,0.9)]" />
               )}
-              <Icon
-                className={`h-4 w-4 ${
-                  active === id ? "text-primary" : "text-[#7180a5] group-hover:text-primary"
-                }`}
-              />
+              <Icon className={`h-4 w-4 ${active === id ? "text-primary" : "text-[#7180a5] group-hover:text-primary"}`} />
               {label}
               {active === id && (
                 <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shadow-primary-glow" />

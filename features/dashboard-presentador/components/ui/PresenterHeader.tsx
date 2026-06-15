@@ -1,5 +1,14 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { Bell, Menu, Sparkles } from "lucide-react";
-import type { PresenterSection } from "@/features/dashboard-presentador/components/PresenterSidebar";
+import type { PresenterSection } from "@/features/dashboard-presentador/components/ui/PresenterSidebar";
+import { SECTION_TO_PATH } from "@/features/dashboard-presentador/components/ui/PresenterSidebar";
+import { useRealtimeNotifications } from "@/features/dashboard-presentador/components/hooks/useRealtimeNotifications";
+
+const PATH_TO_SECTION: Record<string, PresenterSection> = Object.fromEntries(
+  Object.entries(SECTION_TO_PATH).map(([k, v]) => [v, k as PresenterSection])
+);
 
 const SECTION_META: Record<PresenterSection, { eyebrow: string; title: string; description: string }> = {
   "mi-stand": {
@@ -35,13 +44,16 @@ const SECTION_META: Record<PresenterSection, { eyebrow: string; title: string; d
 };
 
 type PresenterHeaderProps = {
-  section: PresenterSection;
   onOpenMenu: () => void;
   presenterName: string;
 };
 
-export function PresenterHeader({ section, onOpenMenu, presenterName }: PresenterHeaderProps) {
+export function PresenterHeader({ onOpenMenu, presenterName }: PresenterHeaderProps) {
+  const pathname = usePathname();
+  const section = PATH_TO_SECTION[pathname] ?? "mis-stands";
   const meta = SECTION_META[section];
+  const { unreadCount, markAllRead } = useRealtimeNotifications();
+
   const initials = presenterName
     .split(" ")
     .map((n) => n[0])
@@ -75,11 +87,16 @@ export function PresenterHeader({ section, onOpenMenu, presenterName }: Presente
 
       <div className="flex items-center gap-2 sm:gap-3">
         <button
+          onClick={markAllRead}
           className="relative rounded-xl border border-white/10 bg-white/5 p-2.5 text-[#adbad5] transition hover:border-primary/30 hover:text-primary"
           aria-label="Notificaciones"
         >
           <Bell className="h-4 w-4" />
-          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-secondary shadow-[0_0_8px_rgba(230,180,255,0.9)]" />
+          {unreadCount > 0 && (
+            <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-secondary font-space text-[9px] font-bold text-[#000837] shadow-[0_0_8px_rgba(230,180,255,0.9)]">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
         </button>
         <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 py-1.5 pl-1.5 pr-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-container to-secondary-container font-space text-xs font-bold text-white shadow-primary-glow">
