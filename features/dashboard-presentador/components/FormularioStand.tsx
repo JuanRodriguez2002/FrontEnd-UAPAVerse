@@ -243,9 +243,9 @@ export default function FormularioStand() {
           <svg width="100%" height="120" viewBox="0 0 288 110" preserveAspectRatio="none">
             <defs>
               <linearGradient id="pulseLine" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#00e5ff" />
-                <stop offset="52%" stopColor="#8b5cf6" />
-                <stop offset="100%" stopColor="#c432ff" />
+                <stop offset="0%" stopColor="#ff9900" />
+                <stop offset="52%" stopColor="#f6c05c" />
+                <stop offset="100%" stopColor="#d8bc97" />
               </linearGradient>
               <filter id="lineGlow">
                 <feGaussianBlur stdDeviation="3" result="blur" />
