@@ -2,6 +2,6 @@
 
 import { MisStandsPage } from "@/features/dashboard-presentador/pages/MisStandsPage";
 
-export default function Page() {
+export function DashboardPage() {
   return <MisStandsPage />;
 }

@@ -1,5 +1,7 @@
 import type { Stand, StandFormData } from "@/features/dashboard-presentador/types/stand";
 
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+
 const STORAGE_KEY = "uapaverse_presentador_stands";
 
 function loadFromStorage(): Stand[] {

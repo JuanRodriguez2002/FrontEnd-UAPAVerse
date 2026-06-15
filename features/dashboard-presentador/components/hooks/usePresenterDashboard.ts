@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { PresenterStats } from "@/features/dashboard-presentador/services/standService";
 import {
   fetchPresenterStands,
@@ -13,15 +13,18 @@ import {
 import type { Stand, StandFormData } from "@/features/dashboard-presentador/types/stand";
 import type { Proposal, ProposalStatus } from "@/features/dashboard-presentador/types/proposal";
 
+const AUTO_REFRESH_INTERVAL = 60_000; // refresca datos cada 60 segundos
+
 export function usePresenterDashboard() {
   const [stands, setStands] = useState<Stand[]>([]);
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [stats, setStats] = useState<PresenterStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const [s, p, st] = await Promise.all([
@@ -35,19 +38,19 @@ export function usePresenterDashboard() {
     } catch {
       setError("Error al cargar los datos. Inténtalo de nuevo.");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     void load();
+    timerRef.current = setInterval(() => void load(true), AUTO_REFRESH_INTERVAL);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [load]);
 
   async function handleSaveStand(data: StandFormData, id?: string) {
     const updated = await createOrUpdateStand(data, id);
-    setStands((prev) =>
-      id ? prev.map((s) => (s.id === id ? updated : s)) : [...prev, updated]
-    );
+    setStands((prev) => id ? prev.map((s) => (s.id === id ? updated : s)) : [...prev, updated]);
     const newStats = await fetchPresenterStats();
     setStats(newStats);
   }
