@@ -118,10 +118,15 @@ export function LoginForm() {
                     Crear Cuenta
                   </Link>
                 </div>
+                  
+                <div className="text-center mt-4">
+                  <p className="text-sm text-[#8f9bb8]"> Continuar con </p> 
+                </div>
 
                   {/* loguearse por Google, Facebook, LinkedIn */}
 
                   <div className="flex justify-center gap-6 mt-6">
+                    
                   <button
                     type="button"
                     onClick={handleGoogleLogin}
