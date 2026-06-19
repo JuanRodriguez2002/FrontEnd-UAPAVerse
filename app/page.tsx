@@ -27,7 +27,7 @@ export default function Home() {
             {/* Reemplazar con el logo oficial de UAPA VERSE si lo tienes en public/ */}
             <div className="text-xl font-extrabold tracking-wider text-[#f7f7f7] uppercase font-mono">
               <Image
-                src="/images/image.png"
+                src="/images/logo.png"
                 alt="UAPAVerse"
                 width={70}
                 height={250}
@@ -84,7 +84,7 @@ export default function Home() {
             {/* Aquí puedes renderizar la ilustración del planeta/logo flotante de tu captura */}
             <div className="relative w-80 h-80 md:w-[420px] md:h-[420px] bg-[#0e1a4f]/40 backdrop-blur-md border border-white/10 rounded-full flex flex-col justify-center items-center p-8  shadow-[0_0_20px_rgba(147,197,253,0.3),inset_0_1px_1px_rgba(255,255,255,0.2)]">
               <Image
-                src="/images/image.png"
+                src="/images/logo.png"
                 alt="UAPAVerse"
                 width={600}
                 height={350}

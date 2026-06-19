@@ -3,7 +3,6 @@
 //}
 
 import React from 'react';
-import Image from 'next/image';
 
 
 // Interfaz para el componente de campos de entrada (Props)
@@ -26,17 +25,17 @@ const InputField: React.FC<InputFieldProps> = ({ label, id, type, placeholder })
       name={id}
       placeholder={placeholder}
       required
-      className="w-full px-4 py-3.5 bg-[#0b132b] text-white placeholder-gray-500 rounded-xl border border-gray-700/60 transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+      className="w-full px-4 py-3.5 bg-[#041147] text-white placeholder-gray-500 rounded-xl border border-gray-700/60 transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
     />
   </div>
 );
 
 export default function RegistrationPage() {
   return (
-    <div className="min-h-screen bg-[#030712] bg-gradient-to-b from-[#030712] via-[#050b18] to-[#02050c] text-white antialiased selection:bg-orange-500/30 font-sans">
+    <div className="min-h-screen bg-[#041147] bg-gradient-to-b text-white antialiased selection:bg-orange-500/30 font-sans">
       
       {/* Navbar */}
-      <header className="border-b border-gray-800/60 backdrop-blur-md bg-[#030712]/50 sticky top-0 z-50">
+      {/* <header className="border-b border-gray-800/60 backdrop-blur-md bg-[#041147]/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between 
         rounded-full border border-blue-500/20 shadow-lg shadow-blue-950/20">
           <div className="flex items-center gap-3">
@@ -62,7 +61,7 @@ export default function RegistrationPage() {
             </a>
           </nav>
         </div>
-      </header>
+      </header> */}
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-12 md:py-20 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center min-h-[calc(100vh-5rem)]">
@@ -96,7 +95,7 @@ export default function RegistrationPage() {
 
         {/* Columna Derecha: Formulario de Registro */}
         <div className="lg:col-span-6 w-full max-w-md mx-auto">
-          <div className="bg-[#070d1e]/80 border border-gray-800/80 rounded-3xl p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden group">
+          <div className="bg-[#041147]/80 border border-gray-800/80 rounded-3xl p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden group">
             
             {/* Efecto de luz ambiental de fondo */}
             <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-blue-500/20 transition-all duration-500" />
@@ -160,7 +159,7 @@ export default function RegistrationPage() {
               <div className="text-center pt-2">
                 <p className="text-sm text-gray-400">
                   ¿Ya tienes usuario?{' '}
-                  <a href="#" className="text-blue-400 hover:text-blue-300 font-medium transition-colors hover:underline">
+                  <a href="/auth/login" className="text-blue-400 hover:text-blue-300 font-medium transition-colors hover:underline">
                     Inicia sesión
                   </a>
                 </p>

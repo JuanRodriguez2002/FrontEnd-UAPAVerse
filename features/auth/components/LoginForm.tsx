@@ -40,7 +40,7 @@ export function LoginForm() {
             {/* Logo */}
             <div className="flex items-center justify-center w-full">
               <Image
-                src="/images/image.png"
+                src="/images/logo.png"
                 alt="UAPAVerse"
                 width={600}
                 height={350}
@@ -67,7 +67,7 @@ export function LoginForm() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 pl-11 text-white outline-none transition placeholder:text-[#5f6e90] focus:border-secondary/40 focus:bg-secondary/5"
+                      className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 pl-11 text-white outline-none transition placeholder:text-[#f2f3f5] focus:border-secondary/40 focus:bg-secondary/5"
                       placeholder="Correo"
                     />
                   </div>
@@ -85,7 +85,7 @@ export function LoginForm() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 pl-11 text-white outline-none transition placeholder:text-[#5f6e90] focus:border-secondary/40 focus:bg-secondary/5"
+                    className="w-full rounded-full border border-white/10 bg-white/[0.04] px-4 py-3 pl-11 text-white outline-none transition placeholder:text-[#f2f3f5] focus:border-secondary/40 focus:bg-secondary/5"
                     placeholder="Contraseña"
                   />
 
@@ -105,7 +105,9 @@ export function LoginForm() {
                   <button
                     onClick={handleLogin}
                     
-                   className="flex-1 text-center bg-white/30 text-white font-bold  px-4 py-3 rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.4)] hover:bg-white/35 hover:scale-[1.02] transition-all duration-300"
+                   className="flex-1 text-center bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white  px-4 py-3 rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.4)] hover:bg-white/35 hover:scale-[1.02] shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all duration-300
+                   
+                   "
                   >
                     Iniciar Sesión
                   </button>
