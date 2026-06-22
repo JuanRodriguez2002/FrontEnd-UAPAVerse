@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Activity,
   BarChart3,
@@ -22,7 +24,6 @@ type AdminSidebarProps = {
   content: AdminDashboardContent["sidebar"];
   open: boolean;
   onClose: () => void;
-  onSelect: (id: string, active: boolean) => void;
 };
 
 const iconByKey: Record<AdminIconKey, typeof Activity> = {
@@ -38,7 +39,9 @@ const iconByKey: Record<AdminIconKey, typeof Activity> = {
   users: Users,
 };
 
-export function AdminSidebar({ content, open, onClose, onSelect }: AdminSidebarProps) {
+export function AdminSidebar({ content, open, onClose }: AdminSidebarProps) {
+  const pathname = usePathname();
+
   return (
     <>
       {open && (
@@ -90,16 +93,16 @@ export function AdminSidebar({ content, open, onClose, onSelect }: AdminSidebarP
           {content.navigationTitle}
         </p>
         <nav className="space-y-1.5">
-          {content.navigation.map(({ id, label, icon, active }) => {
+          {content.navigation.map(({ id, label, href, icon }) => {
             const Icon = iconByKey[icon];
+            const active = pathname === href;
+
             return (
-              <button
-                type="button"
+              <Link
                 key={id}
-                onClick={() => {
-                  onSelect(id, active);
-                  onClose();
-                }}
+                href={href}
+                onClick={onClose}
+                aria-current={active ? "page" : undefined}
                 className={`group relative flex w-full items-center gap-3 overflow-hidden rounded-xl px-3 py-3 text-left text-sm font-semibold transition-all ${
                   active
                     ? "border border-primary/25 bg-gradient-to-r from-primary/20 to-secondary/10 text-neon-white shadow-primary-glow"
@@ -116,7 +119,7 @@ export function AdminSidebar({ content, open, onClose, onSelect }: AdminSidebarP
                 />
                 {label}
                 {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary shadow-primary-glow" />}
-              </button>
+              </Link>
             );
           })}
         </nav>
