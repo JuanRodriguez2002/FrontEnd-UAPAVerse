@@ -6,14 +6,68 @@ import Link from "next/link";
 //para tomar la siguiente imagen
 import Image from "next/image";
 import { Mail, Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function LoginForm() {
+   const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    console.log("Email:", email);
-    console.log("Password:", password);
+    const handleLogin = async () => {
+    try {
+      const response = await fetch(
+        "https://backend-uapaverse.onrender.com/api/uapaverse/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      console.log("Respuesta:", data);
+
+      if (response.ok) {
+       localStorage.setItem("token", data.access_token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+
+        console.log(JSON.stringify(data.user, null, 2));
+
+       alert("Inicio de sesión exitoso");
+       console.log(data.user);
+       switch (data.user.role) {
+            case "ADMIN":
+              router.push("/dashboard-admin");
+              break;
+        {/* hay que crear el dashboard para el rol 2 academico */}
+            case "ACADEMICO":
+              router.push("/dashboard-presentador");
+              break;
+          {/* hay que crear el dashboard para el rol 3 empresario*/}
+            case "EMPRESARIAL":
+              router.push("/dashboard-presentador");
+              break;
+          {/* hay que crear el dashboard para el rol 4 expositor*/}
+            case "EXPOSITOR":
+              router.push("/dashboard-presentador");
+              break;
+            default:
+              router.push("/");
+          }
+      } else {
+        alert(data.message || "Credenciales incorrectas");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("No se pudo conectar con el servidor");
+    }
   };
   
 {/* loguearse por Google */}
@@ -102,12 +156,10 @@ export function LoginForm() {
                 </div>
 
                 <div className="flex gap-3">
-                  <button
+                 <button
+                    type="button"
                     onClick={handleLogin}
-                    
-                   className="flex-1 text-center bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white  px-4 py-3 rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.4)] hover:bg-white/35 hover:scale-[1.02] shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all duration-300
-                   
-                   "
+                    className="flex-1 text-center bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white px-4 py-3 rounded-full shadow-[0_8px_20px_rgba(0,0,0,0.4)] shadow-indigo-500/20 hover:shadow-indigo-500/30 hover:scale-[1.02] transition-all duration-300"
                   >
                     Iniciar Sesión
                   </button>
