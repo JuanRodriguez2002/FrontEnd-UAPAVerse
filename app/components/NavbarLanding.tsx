@@ -1,77 +1,74 @@
-"use client"; // 1. Obligatorio al inicio del archivo para poder usar hooks de estado y rutas
+"use client";
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function NavbarLanding() {
-  const pathname = usePathname(); // Detecta rutas como /auth/login
-  const [currentHash, setCurrentHash] = useState(""); // Detecta hashes como #about
+  const pathname = usePathname();
+  const [currentHash, setCurrentHash] = useState("");
 
-  // Escucha los cambios en el hash (#) de la URL cuando el usuario navega en la landing
   useEffect(() => {
-    // Guarda el hash actual al cargar la página
-    setCurrentHash(window.location.hash);
+    setCurrentHash(window.location.hash || "#inicio");
 
     const handleHashChange = () => {
-      setCurrentHash(window.location.hash);
+      setCurrentHash(window.location.hash || "#inicio");
     };
 
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  // Estilos base compartidos para los enlaces que no son botones ovalados
-  const linkBaseStyle = "text-sm font-medium transition-colors duration-300";
+  const linkBaseStyle = "text-sm font-medium transition-all duration-300 relative pb-1 border-b-2";
 
   return (
     <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#bfc7d3]">
       
-      {/* LINK: Explore (#about) */}
+      {/* LINK: Inicio */}
       <a
-        href="/"
+        href="#inicio"
         className={`${linkBaseStyle} ${
-          currentHash === "/"
-            ? "text-[#98cbff] underline underline-offset-4 shadow-[0_0_15px_rgba(147,197,253,0.2)]" // Estilo si está activo
-            : "text-[#bfc7d3] hover:text-[#f7f7f7]" // Estilo normal
+          currentHash === "#inicio"
+            ? "border-[#98cbff] text-[#98cbff] drop-shadow-[0_0_10px_rgba(147,197,253,0.6)]"
+            : "border-transparent text-[#bfc7d3] hover:text-[#f7f7f7] hover:border-white/20"
         }`}
       >
-        Explore
+        Inicio
       </a>
 
-      {/* LINK: About (#interests) */}
+      {/* LINK: Nosotros */}
       <a
-        href="#interests"
+        href="#nosotros"
         className={`${linkBaseStyle} ${
-          currentHash === "#interests"
-            ? "text-[#98cbff] underline underline-offset-4 shadow-[0_0_15px_rgba(147,197,253,0.2)]"
-            : "text-[#bfc7d3] hover:text-[#f7f7f7]"
+          currentHash === "#nosotros"
+            ? "border-[#98cbff] text-[#98cbff] drop-shadow-[0_0_10px_rgba(147,197,253,0.6)]"
+            : "border-transparent text-[#bfc7d3] hover:text-[#f7f7f7] hover:border-white/20"
         }`}
       >
-        About
+        Nosotros
       </a>
 
-      {/* LINK: Mission (#mission) */}
+      {/* LINK: Misión */}
       <a
-        href="#mission"
+        href="#mision"
         className={`${linkBaseStyle} ${
-          currentHash === "#mission"
-            ? "text-[#98cbff] underline underline-offset-4 shadow-[0_0_15px_rgba(147,197,253,0.2)]"
-            : "text-[#bfc7d3] hover:text-[#f7f7f7]"
+          currentHash === "#mision"
+            ? "border-[#98cbff] text-[#98cbff] drop-shadow-[0_0_10px_rgba(147,197,253,0.6)]"
+            : "border-transparent text-[#bfc7d3] hover:text-[#f7f7f7] hover:border-white/20"
         }`}
       >
-        Mission
+        Misión
       </a>
 
-      {/* BOTÓN OVALADO: Log in (/auth/login) */}
+      {/* BOTÓN OVALADO REAL: Iniciar Sesión */}
       <a
         href="/auth/login"
-        className={`${linkBaseStyle} ${
+        className={`px-5 py-1.5 rounded-full border text-sm font-semibold tracking-wide transition-all duration-300 ${
           pathname === "/auth/login"
-            ? "border-[#98cbff] bg-[#98cbff]/20 text-[#98cbff] shadow-[0_0_20px_rgba(147,197,253,0.4)]" // Si está en el login, se ilumina en 3D
-            : "border-[#98cbff]/30 text-[#f7f7f7] hover:bg-[#98cbff]/10 hover:border-[#98cbff]/60" // Estado normal en reposo
+            ? "border-[#98cbff] bg-[#98cbff]/20 text-[#98cbff] shadow-[0_0_20px_rgba(147,197,253,0.4)]"
+            : "border-[#98cbff]/40 text-[#f7f7f7] hover:bg-[#98cbff]/10 hover:border-[#98cbff] hover:shadow-[0_0_15px_rgba(147,197,253,0.3)]"
         }`}
       >
-        Log in
+        Iniciar Sesión
       </a>
 
     </nav>
