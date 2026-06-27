@@ -6,10 +6,13 @@ import Link from "next/link";
 //para tomar la siguiente imagen
 import Image from "next/image";
 import { Mail, Lock } from "lucide-react";
+//para navegar a la siguiente pagina dependiendo del rol del usuario
 import { useRouter } from "next/navigation";
 
 export function LoginForm() {
-   const router = useRouter();
+  
+        {/* 1. Inicializa el router */}
+   const router = useRouter(); 
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
