@@ -79,6 +79,8 @@ export type AdminGrowthKey =
   | "interactionGrowth"
   | "pendingGrowth";
 
+export type AdminPlaceholderKey = "proyectos" | "reportes" | "seguridad" | "configuracion";
+
 export type AdminDashboardContent = {
   header: {
     eyebrow: string;
@@ -104,8 +106,8 @@ export type AdminDashboardContent = {
     navigation: Array<{
       id: string;
       label: string;
+      href: string;
       icon: AdminIconKey;
-      active: boolean;
     }>;
     futureModuleMessage: string;
     security: {
@@ -182,6 +184,15 @@ export type AdminDashboardContent = {
     };
     loadingRows: number;
   };
+  placeholders: Record<
+    AdminPlaceholderKey,
+    {
+      eyebrow: string;
+      title: string;
+      description: string;
+      icon: AdminIconKey;
+    }
+  >;
   error: {
     message: string;
     retryLabel: string;
@@ -368,7 +379,7 @@ const content: AdminDashboardContent = {
     },
   },
   sidebar: {
-    logoSrc: "/images/image.png",
+    logoSrc: "/images/logo-uapaverse.PNG",
     logoAlt: "UAPAVerse",
     brand: "UAPAVERSE",
     subtitle: "Admin control",
@@ -376,13 +387,13 @@ const content: AdminDashboardContent = {
     closeMenuLabel: "Cerrar menú",
     closeSidebarLabel: "Cerrar sidebar",
     navigation: [
-      { id: "dashboard", label: "Dashboard Admin", icon: "dashboard", active: true },
-      { id: "users", label: "Gestión de usuarios", icon: "users", active: false },
-      { id: "stands", label: "Gestión de stands", icon: "stand", active: false },
-      { id: "projects", label: "Gestión de proyectos", icon: "projects", active: false },
-      { id: "reports", label: "Reportes y estadísticas", icon: "reports", active: false },
-      { id: "security", label: "Seguridad", icon: "security", active: false },
-      { id: "settings", label: "Configuración", icon: "settings", active: false },
+      { id: "dashboard", label: "Dashboard Admin", href: "/dashboard-admin", icon: "dashboard" },
+      { id: "users", label: "Gestión de usuarios", href: "/dashboard-admin/usuarios", icon: "users" },
+      { id: "stands", label: "Gestión de stands", href: "/dashboard-admin/stands", icon: "stand" },
+      { id: "projects", label: "Gestión de proyectos", href: "/dashboard-admin/proyectos", icon: "projects" },
+      { id: "reports", label: "Reportes y estadísticas", href: "/dashboard-admin/reportes", icon: "reports" },
+      { id: "security", label: "Seguridad", href: "/dashboard-admin/seguridad", icon: "security" },
+      { id: "settings", label: "Configuración", href: "/dashboard-admin/configuracion", icon: "settings" },
     ],
     futureModuleMessage: "Módulo preparado para futura integración",
     security: {
@@ -457,6 +468,32 @@ const content: AdminDashboardContent = {
       delete: "Eliminar stand inapropiado",
     },
     loadingRows: 3,
+  },
+  placeholders: {
+    proyectos: {
+      eyebrow: "Gestión de proyectos",
+      title: "Módulo de proyectos preparado",
+      description: "Este espacio queda reservado para integrar el flujo administrativo de proyectos.",
+      icon: "projects",
+    },
+    reportes: {
+      eyebrow: "Reportes y estadísticas",
+      title: "Módulo de reportes preparado",
+      description: "Este espacio queda reservado para integrar analíticas, exportaciones y seguimiento ejecutivo.",
+      icon: "reports",
+    },
+    seguridad: {
+      eyebrow: "Seguridad",
+      title: "Módulo de seguridad preparado",
+      description: "Este espacio queda reservado para integrar políticas de acceso, auditoría y controles de protección.",
+      icon: "security",
+    },
+    configuracion: {
+      eyebrow: "Configuración",
+      title: "Módulo de configuración preparado",
+      description: "Este espacio queda reservado para integrar parámetros globales, preferencias y ajustes del sistema.",
+      icon: "settings",
+    },
   },
   error: {
     message: "No pudimos cargar el panel administrativo. Intenta nuevamente.",
