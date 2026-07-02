@@ -57,15 +57,15 @@ export function LoginForm() {
             case "ADMIN":
               router.push("/dashboard-admin");
               break;
-        {/* hay que crear el dashboard para el rol 2 academico */}
+        {/* hay que crear el dashboard para el rol 2 invitado */}
             case "ACADEMICO":
-              router.push("/dashboard-presentador");
+              router.push("/dashboard-invitado");
               break;
           {/* hay que crear el dashboard para el rol 3 empresario*/}
             case "EMPRESARIAL":
               router.push("/dashboard-presentador");
               break;
-          {/* hay que crear el dashboard para el rol 4 expositor*/}
+          {/* hay que crear el dashboard para el rol 4 expositor/presentador o miembro de cadesoft*/}
             case "EXPOSITOR":
               router.push("/dashboard-presentador");
               break;
