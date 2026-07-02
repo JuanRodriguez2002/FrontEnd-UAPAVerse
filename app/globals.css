@@ -1,6 +1,6 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
 :root {
   --font-sora: var(--font-sora);
@@ -8,17 +8,10 @@
   --font-space: var(--font-space);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    
-  }
-}
-
 body {
   
   margin: 0;
   padding: 0;
-
 }
 
 @layer utilities {
