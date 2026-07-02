@@ -12,8 +12,11 @@ import {
 } from "@/features/dashboard-presentador/actions/presenterActions";
 import type { Stand, StandFormData } from "@/features/dashboard-presentador/types/stand";
 import type { Proposal, ProposalStatus } from "@/features/dashboard-presentador/types/proposal";
+import api from "@/app/lib/api";
 
 const AUTO_REFRESH_INTERVAL = 60_000; // refresca datos cada 60 segundos
+
+
 
 export function usePresenterDashboard() {
   const [stands, setStands] = useState<Stand[]>([]);
@@ -27,16 +30,13 @@ export function usePresenterDashboard() {
     if (!silent) setLoading(true);
     setError(null);
     try {
-      const [s, p, st] = await Promise.all([
-        fetchPresenterStands(),
-        fetchProposals(),
-        fetchPresenterStats(),
-      ]);
-      setStands(s);
-      setProposals(p);
-      setStats(st);
-    } catch {
-      setError("Error al cargar los datos. Inténtalo de nuevo.");
+      // Llamada directa al endpoint de listado de proyectos
+      const response = await api.get('/uapaverse/project/list');
+      // Aseguramos que la respuesta sea un arreglo
+      setStands(Array.isArray(response.data) ? response.data : []);
+    } catch (err) {
+      setError("Error al cargar los proyectos desde el servidor.");
+      console.error(err);
     } finally {
       if (!silent) setLoading(false);
     }
