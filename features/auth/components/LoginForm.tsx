@@ -6,10 +6,13 @@ import Link from "next/link";
 //para tomar la siguiente imagen
 import Image from "next/image";
 import { Mail, Lock } from "lucide-react";
+//para navegar a la siguiente pagina dependiendo del rol del usuario
 import { useRouter } from "next/navigation";
 
 export function LoginForm() {
-   const router = useRouter();
+  
+        {/* 1. Inicializa el router */}
+   const router = useRouter(); 
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,21 +43,29 @@ export function LoginForm() {
 
         console.log(JSON.stringify(data.user, null, 2));
 
+        /*
+        alerta del explorador de que el login fue exitoso **
        alert("Inicio de sesión exitoso");
+
+       muestra los datos del usuario en la consola** 
        console.log(data.user);
+       
+       (removido a peticion)
+       */
+
        switch (data.user.role) {
             case "ADMIN":
               router.push("/dashboard-admin");
               break;
-        {/* hay que crear el dashboard para el rol 2 academico */}
+        {/* hay que crear el dashboard para el rol 2 invitado */}
             case "ACADEMICO":
-              router.push("/dashboard-presentador");
+              router.push("/dashboard-invitado");
               break;
           {/* hay que crear el dashboard para el rol 3 empresario*/}
             case "EMPRESARIAL":
               router.push("/dashboard-presentador");
               break;
-          {/* hay que crear el dashboard para el rol 4 expositor*/}
+          {/* hay que crear el dashboard para el rol 4 expositor/presentador o miembro de cadesoft*/}
             case "EXPOSITOR":
               router.push("/dashboard-presentador");
               break;
