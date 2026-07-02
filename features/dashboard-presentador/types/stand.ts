@@ -1,6 +1,17 @@
 export type StandStatus = "activo" | "borrador" | "revision";
 
 export type Stand = {
+  estado_desarrollo: string;
+  name_proyecto: string;
+  descripcion_proyecto: string;
+  id_categoria: any;
+  demo_url: string;
+  contacto_nombre: string;
+  contacto_telefono: string;
+  contacto_correo: string;
+  informacion_comercial: string;
+  tecnologias_utilizadas: string;
+  estado_proyecto: string;
   id: string;
   nombre: string;
   descripcion: string;

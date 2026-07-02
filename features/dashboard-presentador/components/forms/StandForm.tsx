@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, FileArchive, Image as ImageIcon, Loader2, Tag, Upload, X } from "lucide-react";
 import type { Stand, StandFormData } from "@/features/dashboard-presentador/types/stand";
+import api from "@/app/lib/api";
 
 type StandFormProps = {
-  stand: Stand | null;
-  onSave: (data: StandFormData, id?: string) => Promise<void>;
+  stand: any; 
+  onSave: (data: any, id?: string) => Promise<void>;
 };
 
 const EMPTY: StandFormData = {
@@ -28,18 +29,23 @@ const EMPTY: StandFormData = {
   demoNombre: "",
   status: "borrador",
   colorAcento: "#1f97e7",
+  name_proyecto: "",
+  descripcion_proyecto: "",
+  id_categoria: undefined,
+  demo_url: "",
+  contacto_nombre: "",
+  contacto_telefono: "",
+  contacto_correo: "",
+  informacion_comercial: "",
+  tecnologias_utilizadas: "",
+  estado_desarrollo: "",
+  estado_proyecto: ""
 };
 
-const CATEGORIAS = [
-  "Educación / IA",
-  "Salud / IoT",
-  "Fintech",
-  "Software",
-  "Banca",
-  "Logística",
-  "Sostenibilidad",
-  "Otro",
-];
+interface Categoria {
+  id: number;
+  name_categoria: string;
+}
 
 export function StandForm({ stand, onSave }: StandFormProps) {
   const [form, setForm] = useState<StandFormData>(EMPTY);
@@ -50,12 +56,39 @@ export function StandForm({ stand, onSave }: StandFormProps) {
   const logoRef = useRef<HTMLInputElement>(null);
   const bannerRef = useRef<HTMLInputElement>(null);
   const demoRef = useRef<HTMLInputElement>(null);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
 
+  // 1. Cargar categorías al montar el componente (Filtrando errores 401 si se inyecta el token)
+  useEffect(() => {
+    async function loadCategorias() {
+      try {
+        const response = await api.get('/uapaverse/category/list');
+        setCategorias(Array.isArray(response.data) ? response.data : []);
+      } catch (err: any) {
+        console.error("Error crítico cargando categorías desde el backend:", err.response?.data || err.message);
+      }
+    }
+    loadCategorias();
+  }, []);
+
+  // 2. FIX EDICIÓN: Forzado seguro con 'as any' para ignorar conflictos de tipos con sub-propiedades
   useEffect(() => {
     if (stand) {
-      const { id, visitas, empresasInteresadas, ...rest } = stand;
-      void id; void visitas; void empresasInteresadas;
-      setForm(rest);
+      const categoriaId = stand.id_categoria || stand.category?.id || "";
+      setForm({
+        ...(EMPTY as any),
+        nombre: stand.name_proyecto || "",
+        descripcion: stand.descripcion_proyecto || "",
+        categoria: categoriaId.toString(), 
+        sitioWeb: stand.demo_url || "",
+        representante: stand.contacto_nombre || "",
+        contacto: stand.contacto_telefono || "",
+        emailHolograma: stand.contacto_correo || "",
+        tagline: stand.informacion_comercial || "",
+        stackPrincipal: stand.tecnologias_utilizadas || "",
+        status: stand.estado_desarrollo === "En desarrollo" ? "activo" : "borrador",
+        estado_proyecto: stand.estado_proyecto || "PENDIENTE"
+      } as any);
     } else {
       setForm(EMPTY);
     }
@@ -87,14 +120,50 @@ export function StandForm({ stand, onSave }: StandFormProps) {
       setError("El nombre y la descripción son obligatorios.");
       return;
     }
+
     setSaving(true);
     setError(null);
+
+    let userId = 1; 
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          userId = parsedUser.id || 1;
+        } catch (err) {
+          console.error("Error al procesar el usuario de localStorage:", err);
+        }
+      }
+    }
+
+    const payload = {
+      name_proyecto: form.nombre,
+      descripcion_proyecto: form.descripcion,
+      id_categoria: Number(form.categoria) || 1, 
+      id_usuario: userId, 
+      carrera_asociada: "Ingeniería de Software",
+      tecnologias_utilizadas: form.stackPrincipal,
+      nivel_madurez_tecnologica: "Prototipo funcional",
+      estado_desarrollo: form.status === "activo" ? "En desarrollo" : "Borrador",
+      estado_proyecto: stand ? stand.estado_proyecto : "PENDIENTE", 
+      informacion_tecnica: form.stackPrincipal || "N/A",
+      informacion_comercial: form.tagline || "N/A",
+      demo_url: form.sitioWeb || "",
+      contacto_nombre: form.representante || "",
+      contacto_telefono: form.contacto || "",
+      contacto_correo: form.emailHolograma || "",
+      nombre_grupo: "Grupo " + form.nombre,
+      contacto_rol: "Expositor principal"
+    };
+
     try {
-      await onSave(form, stand?.id);
+      await onSave(payload, stand?.id?.toString());
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-    } catch {
-      setError("Error al guardar. Inténtalo de nuevo.");
+    } catch (err) {
+      console.error(err);
+      setError("Error al guardar. Verifica la conexión con el servidor o los headers.");
     } finally {
       setSaving(false);
     }
@@ -128,7 +197,7 @@ export function StandForm({ stand, onSave }: StandFormProps) {
             <select value={form.categoria} onChange={(e) => set("categoria", e.target.value)}
               className="rounded-xl border border-white/10 bg-[#0e1a4f] px-4 py-2.5 text-sm text-white outline-none transition focus:border-primary/40">
               <option value="">Seleccionar...</option>
-              {CATEGORIAS.map((c) => <option key={c} value={c}>{c}</option>)}
+              {categorias.map((c) => <option key={c.id} value={c.id.toString()}>{c.name_categoria}</option>)}
             </select>
           </div>
 
@@ -175,7 +244,7 @@ export function StandForm({ stand, onSave }: StandFormProps) {
             <select value={form.status} onChange={(e) => set("status", e.target.value as StandFormData["status"])}
               className="rounded-xl border border-white/10 bg-[#0e1a4f] px-4 py-2.5 text-sm text-white outline-none transition focus:border-primary/40">
               <option value="borrador">Borrador</option>
-              <option value="activo">Activo</option>
+              <option value="activo">Active</option>
               <option value="revision">En revisión</option>
             </select>
           </div>
@@ -261,7 +330,6 @@ export function StandForm({ stand, onSave }: StandFormProps) {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {/* Logo */}
           <div>
             <label className={`${labelClass} mb-2 block`}>Logo del proyecto</label>
             <input ref={logoRef} type="file" accept=".png,.svg" className="hidden"
@@ -276,7 +344,6 @@ export function StandForm({ stand, onSave }: StandFormProps) {
             </button>
           </div>
 
-          {/* Banner */}
           <div>
             <label className={`${labelClass} mb-2 block`}>Banner del stand</label>
             <input ref={bannerRef} type="file" accept=".jpg,.jpeg,.png,.webp" className="hidden"
@@ -291,7 +358,6 @@ export function StandForm({ stand, onSave }: StandFormProps) {
             </button>
           </div>
 
-          {/* Demo ejecutable */}
           <div className="sm:col-span-2">
             <label className={`${labelClass} mb-2 block`}>Ejecutable demo (opcional)</label>
             <input ref={demoRef} type="file" accept=".zip,.gltf,.glb" className="hidden"
