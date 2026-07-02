@@ -43,8 +43,16 @@ export function LoginForm() {
 
         console.log(JSON.stringify(data.user, null, 2));
 
+        /*
+        alerta del explorador de que el login fue exitoso **
        alert("Inicio de sesión exitoso");
+
+       muestra los datos del usuario en la consola** 
        console.log(data.user);
+       
+       (removido a peticion)
+       */
+
        switch (data.user.role) {
             case "ADMIN":
               router.push("/dashboard-admin");

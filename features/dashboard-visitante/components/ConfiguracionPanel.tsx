@@ -1,5 +1,3 @@
-"use client";
-
 import { useRef, useState } from "react";
 import { Bell, CheckCircle2, Eye, EyeOff, Loader2, MessageSquare, Shield, User } from "lucide-react";
 
@@ -12,30 +10,26 @@ type AlertToggle = {
 };
 
 const DEFAULT_ALERTS: AlertToggle[] = [
-  { id: "Analytics", label: "Analisis de Visitas", description: "Recibe notificaciones de visitas en tiempo real", icon: Eye, enabled: true },
+  { id: "visitor", label: "Analisis de Visitas", description: "Recibe notificaciones de visitas en tiempo real", icon: Eye, enabled: true },
   { id: "messages", label: "Mensajes Directos", description: "Alertas de mensajes de empresas interesadas", icon: MessageSquare, enabled: true },
   { id: "system", label: "Actualizaciones del Sistema", description: "Actualizaciones del sistema UAPA VERSE", icon: Bell, enabled: false },
 ];
 
 const SECTORS = [
-  "Artificial Intelligence",
-  "Software Development",
-  "Fintech",
-  "Healthcare / IoT",
-  "Education",
-  "Logistics",
-  "Sustainability",
+  "Participante",
+  "Invitado",
+  "Facilitador",
   "Otro",
 ];
 
-export function ConfigurationPanel() {
+export function ConfiguracionPanel() {
   const avatarRef = useRef<HTMLInputElement>(null);
 
-  // Company Profile
+  // User Profile
   const [profile, setProfile] = useState({
-    companyName: "VILLARINTO SIERRA",
-    sector: "Artificial Intelligence",
-    description: "Pioneering the next generation of neural interfaces for seamless human-computer synergy in virtual environments.",
+    username: "Maria Perez",
+    sector: "Facilitador",
+    description: "En el camino de la enseñanza, sembrando semillas para cultivar el conocimiento del futuro.",
     avatarUrl: "",
     avatarLetter: "VS",
   });
@@ -97,7 +91,7 @@ export function ConfigurationPanel() {
       <form onSubmit={saveProfile} className={`${cardClass} flex flex-col gap-5`}>
         <div className="flex items-center gap-2">
           <User className="h-4 w-4 text-primary" />
-          <h2 className="font-sora text-base font-bold text-neon-white">Perfil de Empresa</h2>
+          <h2 className="font-sora text-base font-bold text-neon-white">Perfil del Usuario</h2>
         </div>
 
         {/* Avatar */}
@@ -118,7 +112,7 @@ export function ConfigurationPanel() {
           </button>
           <input ref={avatarRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
           <div>
-            <p className="text-sm font-bold text-neon-white">{profile.companyName}</p>
+            <p className="text-sm font-bold text-neon-white">{profile.username}</p>
             <button
               type="button"
               onClick={() => avatarRef.current?.click()}
@@ -131,10 +125,10 @@ export function ConfigurationPanel() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <label className={labelClass}>Nombre de la empresa</label>
+            <label className={labelClass}>Nombre de usuario</label>
             <input
-              value={profile.companyName}
-              onChange={(e) => setProfile((p) => ({ ...p, companyName: e.target.value, avatarLetter: e.target.value.slice(0, 2).toUpperCase() }))}
+              value={profile.username}
+              onChange={(e) => setProfile((p) => ({ ...p, username: e.target.value, avatarLetter: e.target.value.slice(0, 2).toUpperCase() }))}
               className={inputClass}
             />
           </div>
@@ -171,7 +165,7 @@ export function ConfigurationPanel() {
             className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary-container to-[#2563eb] px-5 py-2 text-sm font-bold text-white shadow-primary-glow transition hover:shadow-primary-glow-hover disabled:opacity-60"
           >
             {savingProfile && <Loader2 className="h-4 w-4 animate-spin" />}
-            {savingProfile ? "Guardando..." : "Save Profile"}
+            {savingProfile ? "Guardando..." : "Guardar cambios"}
           </button>
         </div>
       </form>
@@ -183,12 +177,13 @@ export function ConfigurationPanel() {
         <form onSubmit={saveSecurity} className={`${cardClass} flex flex-col gap-5`}>
           <div className="flex items-center gap-2">
             <Shield className="h-4 w-4 text-secondary" />
-            <h2 className="font-sora text-base font-bold text-neon-white">Terminal Security</h2>
+            <h2 className="font-sora text-base font-bold text-neon-white">Actualizar credenciales</h2>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className={labelClass}>Nueva Contraseña (API)</label>
+                {/* donde dice paiment token editar para la api */}
+              <label className={labelClass}>Nueva contraseña </label>
               <div className="relative">
                 <input
                   type={showToken ? "text" : "password"}
@@ -206,11 +201,12 @@ export function ConfigurationPanel() {
                 </button>
               </div>
             </div>
-
+            {/* donde dice secret key editar para la api */}
             <div>
-              <label className={labelClass}>Confirmar Contraseña</label>
+              <label className={labelClass}>Confirmar contraseña</label>
               <div className="relative">
                 <input
+                      
                   type={showSecret ? "text" : "password"}
                   value={security.secretKey}
                   onChange={(e) => setSecurity((s) => ({ ...s, secretKey: e.target.value }))}
@@ -240,12 +236,12 @@ export function ConfigurationPanel() {
               className="flex items-center gap-2 rounded-xl border border-secondary/30 bg-secondary/10 px-5 py-2 text-sm font-bold text-secondary transition hover:bg-secondary/20 disabled:opacity-60"
             >
               {savingSec && <Loader2 className="h-4 w-4 animate-spin" />}
-              {savingSec ? "Actualizando..." : "Actualizar Credenciales"}
+              {savingSec ? "Actualizando..." : "Actualizar"}
             </button>
           </div>
         </form>
 
-        {/* Neural Alerts */}
+        {/* Notificaciones */}
         <div className={cardClass}>
           <div className="mb-5 flex items-center gap-2">
             <Bell className="h-4 w-4 text-[#77f6c6]" />
@@ -266,7 +262,7 @@ export function ConfigurationPanel() {
                   type="button"
                   onClick={() => toggleAlert(id)}
                   aria-label={`Toggle ${label}`}
-                  className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-300 ${
+                  className={`relative h-6 w-11 overflow-hidden rounded-full transition-colors ${
                     enabled ? "bg-primary-container" : "bg-white/10"
                   }`}
                 >
