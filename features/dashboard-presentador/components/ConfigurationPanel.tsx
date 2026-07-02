@@ -12,9 +12,9 @@ type AlertToggle = {
 };
 
 const DEFAULT_ALERTS: AlertToggle[] = [
-  { id: "Analytics", label: "Analisis de Visitas", description: "Recibe notificaciones de visitas en tiempo real", icon: Eye, enabled: true },
-  { id: "messages", label: "Mensajes Directos", description: "Alertas de mensajes de empresas interesadas", icon: MessageSquare, enabled: true },
-  { id: "system", label: "Actualizaciones del Sistema", description: "Actualizaciones del sistema UAPA VERSE", icon: Bell, enabled: false },
+  { id: "visitor", label: "Visitor Analytics", description: "Recibe notificaciones de visitas en tiempo real", icon: Eye, enabled: true },
+  { id: "messages", label: "Direct Messages", description: "Alertas de mensajes de empresas interesadas", icon: MessageSquare, enabled: true },
+  { id: "system", label: "System Updates", description: "Actualizaciones del sistema UAPA VERSE", icon: Bell, enabled: false },
 ];
 
 const SECTORS = [
@@ -97,7 +97,7 @@ export function ConfigurationPanel() {
       <form onSubmit={saveProfile} className={`${cardClass} flex flex-col gap-5`}>
         <div className="flex items-center gap-2">
           <User className="h-4 w-4 text-primary" />
-          <h2 className="font-sora text-base font-bold text-neon-white">Perfil de Empresa</h2>
+          <h2 className="font-sora text-base font-bold text-neon-white">Company Profile</h2>
         </div>
 
         {/* Avatar */}
@@ -188,7 +188,7 @@ export function ConfigurationPanel() {
 
           <div className="space-y-4">
             <div>
-              <label className={labelClass}>Nueva Contraseña (API)</label>
+              <label className={labelClass}>Payment Token (API)</label>
               <div className="relative">
                 <input
                   type={showToken ? "text" : "password"}
@@ -208,7 +208,7 @@ export function ConfigurationPanel() {
             </div>
 
             <div>
-              <label className={labelClass}>Confirmar Contraseña</label>
+              <label className={labelClass}>Secret Key</label>
               <div className="relative">
                 <input
                   type={showSecret ? "text" : "password"}
@@ -240,7 +240,7 @@ export function ConfigurationPanel() {
               className="flex items-center gap-2 rounded-xl border border-secondary/30 bg-secondary/10 px-5 py-2 text-sm font-bold text-secondary transition hover:bg-secondary/20 disabled:opacity-60"
             >
               {savingSec && <Loader2 className="h-4 w-4 animate-spin" />}
-              {savingSec ? "Actualizando..." : "Actualizar Credenciales"}
+              {savingSec ? "Actualizando..." : "Update Credentials"}
             </button>
           </div>
         </form>
@@ -249,7 +249,7 @@ export function ConfigurationPanel() {
         <div className={cardClass}>
           <div className="mb-5 flex items-center gap-2">
             <Bell className="h-4 w-4 text-[#77f6c6]" />
-            <h2 className="font-sora text-base font-bold text-neon-white">Notificaciones</h2>
+            <h2 className="font-sora text-base font-bold text-neon-white">Neural Alerts</h2>
           </div>
 
           <div className="space-y-4">
@@ -272,7 +272,7 @@ export function ConfigurationPanel() {
                 >
                   <span
                     className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-300 ${
-                      enabled ? "-translate-x-5" : "translate-x-0"
+                      enabled ? "translate-x-5" : "translate-x-0.5"
                     }`}
                   />
                 </button>
