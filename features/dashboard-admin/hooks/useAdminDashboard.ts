@@ -29,14 +29,13 @@ export function useAdminDashboard() {
     setError(null);
 
     try {
-      const [dashboardStats, adminUsers, adminStands, recentActivity, dashboardContent] =
-        await Promise.all([
-          getAdminDashboardStats(),
-          getAdminUsers(),
-          getAdminStands(),
-          getRecentAdminActivity(),
-          getAdminDashboardContent(),
-        ]);
+      const [adminUsers, adminStands, recentActivity, dashboardContent] = await Promise.all([
+        getAdminUsers(),
+        getAdminStands(),
+        getRecentAdminActivity(),
+        getAdminDashboardContent(),
+      ]);
+      const dashboardStats = await getAdminDashboardStats(adminUsers, adminStands);
 
       setStats(dashboardStats);
       setUsers(adminUsers);
