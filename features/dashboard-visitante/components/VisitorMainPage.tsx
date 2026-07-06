@@ -1,20 +1,44 @@
-import { ArrowRight, CalendarClock, Heart, Sparkles, Store } from "lucide-react";
+"use client";
+
+import { ArrowRight, Heart, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getProjects } from "../services/projectService";
+import type { Project } from "../types/project";
+
 
 // editar las categorias a las que se tienen en base de datos, para que se muestren en el dashboard del visitante y empresa
 // name es nombre del proyecto, category es la categoria a la que pertenece el proyecto y description es una breve descripcion del proyecto
-const historial = [
+/*const historial = [
  { name: "Pewdie Pie", category: "Biotecnologia", description: "Explora soluciones de visión artificial y automatización, en la salud." },
   { name: "Agustin Unaplay8", category: "Agrimensura", description: "Descubre experiencias inmersivas de agrimensura." },
   { name: "IBAI", category: "CloudComputing", description: "Una vista rápida de cloud computing." },
-];
+];*/
 
-const stands = [
-  { name: "Neural Labs", category: "IA y datos", description: "Explora soluciones de visión artificial y automatización." },
-  { name: "EcoSphere", category: "Sostenibilidad", description: "Descubre experiencias inmersivas para negocios verdes." },
-  { name: "CloudForge", category: "Cloud", description: "Una vista rápida de herramientas para escalar equipos." },
-];
+
+/*const stands = [
+  //{ name: "Neural Labs", category: "IA y datos", description: "Explora soluciones de visión artificial y automatización." },
+  //{ name: "EcoSphere", category: "Sostenibilidad", description: "Descubre experiencias inmersivas para negocios verdes." },
+  //{ name: "CloudForge", category: "Cloud", description: "Una vista rápida de herramientas para escalar equipos." },
+];*/
+
 
 export function VisitorMainPage() {
+
+  const [stands, setStands] = useState<Project[]>([]);
+
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const data = await getProjects();
+        setStands(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadProjects();
+  }, []);
+  if (!stands) return <div className="text-white">Cargando...</div>;
   return (
     <div className="space-y-6">
       <section className="rounded-[28px] border border-white/10 bg-gradient-to-br from-[#132a69] via-[#0a163e] to-[#060d2a]  py-20 p-10 shadow-[0_20px_70px_rgba(2,8,23,0.35)]">
@@ -50,17 +74,17 @@ export function VisitorMainPage() {
 
           <div className="mt-5 space-y-3">
             {stands.map((stand) => (
-              <div key={stand.name} className="rounded-2xl border border-white/10 bg-white/5 p-4  hover:border-white/15 hover:bg-white/[0.045]">
+              <div key={stand.id ?? Math.random()} className="rounded-2xl border border-white/10 bg-white/5 p-4  hover:border-white/15 hover:bg-white/[0.045]">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-white">{stand.name}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-primary">{stand.category}</p>
+                    <p className="text-sm font-semibold text-white">{stand.name_proyecto ?? "Sin nombre"}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-primary">{stand.category?.name_categoria ?? "Sin categoría"}</p>
                   </div>
                   <button className="rounded-full border border-white/10 p-2 text-[#8f9bb8] transition hover:bg-red-800/10 hover:text-red-300">
                     <Heart className="h-4 w-4" />
                   </button>
                 </div>
-                <p className="mt-3 text-sm text-[#8f9bb8]">{stand.description}</p>
+                <p className="mt-3 text-sm text-[#8f9bb8]">{stand.descripcion_proyecto ?? ""}</p>
               
               </div>
             ))}
