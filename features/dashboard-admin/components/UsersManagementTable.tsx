@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Ban, ChevronDown, Eye, MoreHorizontal, Users } from "lucide-react";
 import type {
   AdminDashboardContent,
@@ -23,6 +24,8 @@ const statusClasses = {
   Baneado: "bg-error/10 text-error border-error/20",
 };
 
+const PAGE_SIZE = 8;
+
 export function UsersManagementTable({
   content,
   users,
@@ -32,6 +35,17 @@ export function UsersManagementTable({
   onRequestBan,
   onViewDetails,
 }: UsersManagementTableProps) {
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(users.length / PAGE_SIZE));
+  const pageStart = (currentPage - 1) * PAGE_SIZE;
+  const paginatedUsers = users.slice(pageStart, pageStart + PAGE_SIZE);
+  const isFirstPage = currentPage === 1;
+  const isLastPage = currentPage === totalPages;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [users]);
+
   const handleRoleChange = async (userId: string, role: AdminUserRole) => {
     onAction(await onChangeRole(userId, role));
   };
@@ -81,13 +95,13 @@ export function UsersManagementTable({
                     </td>
                   </tr>
                 ))
-              : users.map((user, index) => (
+              : paginatedUsers.map((user, index) => (
                   <tr key={user.id} className="group transition hover:bg-primary/[0.035]">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div
                           className={`flex h-9 w-9 items-center justify-center rounded-xl border text-xs font-bold text-white ${
-                            index % 2 === 0
+                            (pageStart + index) % 2 === 0
                               ? "border-primary/25 bg-gradient-to-br from-primary-container/80 to-primary-container/25"
                               : "border-secondary/25 bg-gradient-to-br from-secondary-container/80 to-secondary-container/25"
                           }`}
@@ -142,9 +156,31 @@ export function UsersManagementTable({
                       </div>
                     </td>
                   </tr>
-                ))}
+              ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="flex flex-col gap-3 border-t border-white/[0.07] px-5 py-4 font-space text-[10px] font-bold uppercase tracking-wider text-[#8190b0] sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <button
+          type="button"
+          onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+          disabled={isFirstPage || loading}
+          className="rounded-lg border border-primary/20 bg-primary/10 px-3 py-2 text-primary transition hover:bg-primary/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-[#596888]"
+        >
+          Anterior
+        </button>
+        <span className="text-center">
+          Página {currentPage} de {totalPages}
+        </span>
+        <button
+          type="button"
+          onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+          disabled={isLastPage || loading}
+          className="rounded-lg border border-primary/20 bg-primary/10 px-3 py-2 text-primary transition hover:bg-primary/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-[#596888]"
+        >
+          Siguiente
+        </button>
       </div>
     </section>
   );

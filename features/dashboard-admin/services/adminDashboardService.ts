@@ -32,6 +32,7 @@ export type AdminStand = {
   status: AdminStandStatus;
   visits: number;
   accent: "blue" | "purple" | "cyan";
+  resources?: BackendProjectResource[];
 };
 
 export type AdminStandUpdateInput = {
@@ -579,16 +580,245 @@ const simulateAdminAction = async (message: string): Promise<AdminActionResult> 
   return { success: true, message };
 };
 
-export async function getAdminDashboardStats() {
-  return simulateApiResponse(stats);
+const ADMIN_API_BASE_URL = "https://backend-uapaverse.onrender.com/api/uapaverse";
+
+type BackendRoleName = "ADMIN" | "ACADEMICO" | "EMPRESARIO" | "EXPOSITOR";
+
+type BackendRole = {
+  id: number;
+  name_rol: BackendRoleName | string;
+};
+
+type BackendUser = {
+  id: number | string;
+  name_usuario?: string | null;
+  email_usuario?: string | null;
+  rol_id?: number | null;
+  role?: BackendRole | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+};
+
+type BackendCategory = {
+  id: number;
+  name_categoria?: string | null;
+};
+
+export type BackendProjectResource = {
+  id?: number | string;
+  name_recurso?: string | null;
+  type_recurso?: string | null;
+  route_recurso?: string | null;
+};
+
+type BackendProject = {
+  id: number | string;
+  name_proyecto?: string | null;
+  descripcion_proyecto?: string | null;
+  estado_proyecto?: string | null;
+  nombre_grupo?: string | null;
+  id_categoria?: number | string | null;
+  category?: BackendCategory | null;
+  resources?: BackendProjectResource[] | null;
+};
+
+const backendRoleToAdminRole: Record<BackendRoleName, AdminUserRole> = {
+  ADMIN: "Administrador",
+  ACADEMICO: "Coordinador",
+  EMPRESARIO: "Empresa",
+  EXPOSITOR: "Presentador",
+};
+
+const fallbackRoleIds: Record<AdminUserRole, number> = {
+  Administrador: 1,
+  Coordinador: 2,
+  Empresa: 3,
+  Presentador: 4,
+};
+
+const standAccents: AdminStand["accent"][] = ["blue", "purple", "cyan"];
+
+let cachedRoles: BackendRole[] | null = null;
+let cachedCategories: BackendCategory[] | null = null;
+
+function getAuthHeaders(): HeadersInit {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  if (typeof window !== "undefined") {
+    const token = window.localStorage.getItem("token");
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+}
+
+async function adminApiRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(`${ADMIN_API_BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      ...getAuthHeaders(),
+      ...init?.headers,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Admin API error ${response.status} for ${path}`);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  return response.json() as Promise<T>;
+}
+
+function ensureArray<T>(data: T[] | { data?: T[] }): T[] {
+  return Array.isArray(data) ? data : data.data ?? [];
+}
+
+function normalizeBackendRole(role?: string | null): BackendRoleName | null {
+  if (!role) return null;
+  const normalized = role.trim().toUpperCase();
+  if (normalized in backendRoleToAdminRole) return normalized as BackendRoleName;
+  return null;
+}
+
+function mapBackendRoleToAdminRole(role?: string | null): AdminUserRole {
+  const normalizedRole = normalizeBackendRole(role);
+  return normalizedRole ? backendRoleToAdminRole[normalizedRole] : "Presentador";
+}
+
+function getInitials(name: string): string {
+  const initials = name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("");
+
+  return initials.toUpperCase() || "US";
+}
+
+function formatDateTime(value?: string | null): string {
+  if (!value) return "No disponible";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return new Intl.DateTimeFormat("es-DO", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
+function mapBackendUser(user: BackendUser): AdminUser {
+  const name = user.name_usuario?.trim() || "Usuario sin nombre";
+
+  return {
+    id: String(user.id),
+    name,
+    email: user.email_usuario?.trim() || "Correo no disponible",
+    initials: getInitials(name),
+    role: mapBackendRoleToAdminRole(user.role?.name_rol),
+    status: "Activo",
+    lastActive: formatDateTime(user.created_at),
+  };
+}
+
+function mapBackendProjectStatus(status?: string | null): AdminStandStatus {
+  const normalized = status?.trim().toUpperCase();
+
+  if (normalized === "APROBADO" || normalized === "ACTIVO") return "Activo";
+  if (normalized === "PENDIENTE") return "Pendiente";
+
+  return "Revisión";
+}
+
+function mapBackendProject(project: BackendProject, index = 0): AdminStand {
+  return {
+    id: String(project.id),
+    name: project.name_proyecto?.trim() || "Proyecto sin nombre",
+    company: project.nombre_grupo?.trim() || "Organización no disponible",
+    category: project.category?.name_categoria?.trim() || "Sin categoría",
+    status: mapBackendProjectStatus(project.estado_proyecto),
+    resources: project.resources ?? [],
+    visits: 0,
+    accent: standAccents[index % standAccents.length],
+  };
+}
+
+async function getBackendRoles(): Promise<BackendRole[]> {
+  if (cachedRoles) return cachedRoles;
+
+  const roles = ensureArray(await adminApiRequest<BackendRole[] | { data?: BackendRole[] }>("/role/list"));
+  cachedRoles = roles;
+
+  return roles;
+}
+
+async function getBackendCategories(): Promise<BackendCategory[]> {
+  if (cachedCategories) return cachedCategories;
+
+  const categories = ensureArray(
+    await adminApiRequest<BackendCategory[] | { data?: BackendCategory[] }>("/category/list"),
+  );
+  cachedCategories = categories;
+
+  return categories;
+}
+
+async function resolveRoleId(role: AdminUserRole): Promise<number> {
+  const roles = await getBackendRoles();
+  const backendRole = roles.find((item) => mapBackendRoleToAdminRole(item.name_rol) === role);
+
+  return backendRole?.id ?? fallbackRoleIds[role];
+}
+
+async function resolveCategoryId(categoryName: string): Promise<number | undefined> {
+  const categories = await getBackendCategories();
+  const normalizedCategoryName = categoryName.trim().toUpperCase();
+  const category = categories.find(
+    (item) => item.name_categoria?.trim().toUpperCase() === normalizedCategoryName,
+  );
+
+  return category?.id;
+}
+
+export async function getAdminDashboardStats(
+  adminUsers?: AdminUser[],
+  adminStands?: AdminStand[],
+): Promise<AdminDashboardStats> {
+  const [usersFromApi, standsFromApi] =
+    adminUsers && adminStands ? [adminUsers, adminStands] : await Promise.all([getAdminUsers(), getAdminStands()]);
+
+  return {
+    totalUsers: usersFromApi.length,
+    activeStands: standsFromApi.length,
+    interactions: 0,
+    pendingRequests: 0,
+    userGrowth: 0,
+    standGrowth: 0,
+    interactionGrowth: 0,
+    pendingGrowth: 0,
+  };
 }
 
 export async function getAdminUsers() {
-  return simulateApiResponse(users);
+  const backendUsers = ensureArray(
+    await adminApiRequest<BackendUser[] | { data?: BackendUser[] }>("/user/list"),
+  );
+
+  return backendUsers.map(mapBackendUser);
 }
 
 export async function getAdminStands() {
-  return simulateApiResponse(stands);
+  const backendProjects = ensureArray(
+    await adminApiRequest<BackendProject[] | { data?: BackendProject[] }>("/project/list"),
+  );
+
+  return backendProjects.map(mapBackendProject);
 }
 
 export async function getRecentAdminActivity() {
@@ -596,33 +826,84 @@ export async function getRecentAdminActivity() {
 }
 
 export async function getAdminDashboardContent() {
-  return simulateApiResponse(content);
+  const roles = await getBackendRoles();
+  const availableRoles = roles.map((role) => mapBackendRoleToAdminRole(role.name_rol));
+
+  return simulateApiResponse({
+    ...content,
+    users: {
+      ...content.users,
+      availableRoles: availableRoles.length ? availableRoles : content.users.availableRoles,
+    },
+  });
 }
 
 export async function updateAdminUserRole(userId: string, role: AdminUserRole) {
-  return simulateAdminAction(`Rol de ${userId} actualizado a ${role}.`);
+  const [user, roleId] = await Promise.all([
+    adminApiRequest<BackendUser>(`/user/${userId}`),
+    resolveRoleId(role),
+  ]);
+
+  await adminApiRequest<BackendUser>(`/user/${userId}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      name_usuario: user.name_usuario,
+      email_usuario: user.email_usuario,
+      rol_id: roleId,
+    }),
+  });
+
+  return { success: true, message: `Rol de ${user.name_usuario ?? userId} actualizado a ${role}.` };
 }
 
 export async function disableAdminUser(userId: string) {
-  return simulateAdminAction(`Usuario ${userId} baneado correctamente.`);
+  return {
+    success: false,
+    message: `La acción de banear usuarios aún no está disponible en el backend. Usuario: ${userId}.`,
+  };
 }
 
 export async function getAdminUserDetails(userId: string) {
-  return simulateAdminAction(`Detalles de ${userId} preparados para visualizar.`);
+  const user = mapBackendUser(await adminApiRequest<BackendUser>(`/user/${userId}`));
+  return { success: true, message: `Detalles de ${user.name} cargados desde el backend.` };
 }
 
 export async function getAdminStandDetails(standId: string) {
-  return simulateAdminAction(`Detalles del stand ${standId} preparados para visualizar.`);
+  const stand = mapBackendProject(await adminApiRequest<BackendProject>(`/project/${standId}`));
+  return { success: true, message: `Detalles del stand ${stand.name} cargados desde el backend.` };
 }
 
 export async function approveStand(standId: string) {
-  return simulateAdminAction(`Stand ${standId} aprobado correctamente.`);
+  await adminApiRequest<BackendProject>(`/project/${standId}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      estado_proyecto: "APROBADO",
+    }),
+  });
+
+  return { success: true, message: `Stand ${standId} aprobado correctamente.` };
 }
 
 export async function prepareStandEditor(standId: string, update: AdminStandUpdateInput) {
-  return simulateAdminAction(`Cambios de ${update.name} preparados para el stand ${standId}.`);
+  const currentProject = await adminApiRequest<BackendProject>(`/project/${standId}`);
+  const categoryId = await resolveCategoryId(update.category);
+
+  await adminApiRequest<BackendProject>(`/project/${standId}`, {
+    method: "PUT",
+    body: JSON.stringify({
+      name_proyecto: update.name,
+      nombre_grupo: update.company,
+      id_categoria: categoryId ?? currentProject.id_categoria ?? currentProject.category?.id,
+    }),
+  });
+
+  return { success: true, message: `Cambios de ${update.name} guardados en el backend.` };
 }
 
 export async function markStandForDeletion(standId: string) {
-  return simulateAdminAction(`Stand ${standId} marcado para eliminación.`);
+  await adminApiRequest<void>(`/project/${standId}`, {
+    method: "DELETE",
+  });
+
+  return { success: true, message: `Stand ${standId} eliminado correctamente.` };
 }
