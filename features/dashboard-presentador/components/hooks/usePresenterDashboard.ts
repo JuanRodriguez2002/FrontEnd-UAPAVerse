@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { PresenterStats } from "@/features/dashboard-presentador/services/standService";
+import type { PresenterStats, ApiProject, CreateProjectInput } from "@/features/dashboard-presentador/services/standService";
 import {
   fetchPresenterStands,
   fetchPresenterStats,
@@ -10,16 +10,12 @@ import {
   fetchProposals,
   respondToProposal,
 } from "@/features/dashboard-presentador/actions/presenterActions";
-import type { Stand, StandFormData } from "@/features/dashboard-presentador/types/stand";
 import type { Proposal, ProposalStatus } from "@/features/dashboard-presentador/types/proposal";
-import api from "@/app/lib/api";
 
-const AUTO_REFRESH_INTERVAL = 60_000; // refresca datos cada 60 segundos
-
-
+const AUTO_REFRESH_INTERVAL = 60_000;
 
 export function usePresenterDashboard() {
-  const [stands, setStands] = useState<Stand[]>([]);
+  const [stands, setStands] = useState<ApiProject[]>([]);
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [stats, setStats] = useState<PresenterStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,13 +26,16 @@ export function usePresenterDashboard() {
     if (!silent) setLoading(true);
     setError(null);
     try {
-      // Llamada directa al endpoint de listado de proyectos
-      const response = await api.get('/uapaverse/project/list');
-      // Aseguramos que la respuesta sea un arreglo
-      setStands(Array.isArray(response.data) ? response.data : []);
-    } catch (err) {
-      setError("Error al cargar los proyectos desde el servidor.");
-      console.error(err);
+      const [s, p, st] = await Promise.all([
+        fetchPresenterStands(),
+        fetchProposals(),
+        fetchPresenterStats(),
+      ]);
+      setStands(s);
+      setProposals(p);
+      setStats(st);
+    } catch {
+      setError("Error al cargar los datos. Inténtalo de nuevo.");
     } finally {
       if (!silent) setLoading(false);
     }
@@ -48,16 +47,18 @@ export function usePresenterDashboard() {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [load]);
 
-  async function handleSaveStand(data: StandFormData, id?: string) {
+  async function handleSaveStand(data: CreateProjectInput, id?: string | number) {
     const updated = await createOrUpdateStand(data, id);
-    setStands((prev) => id ? prev.map((s) => (s.id === id ? updated : s)) : [...prev, updated]);
+    setStands((prev) =>
+      id ? prev.map((s) => (s.id === Number(id) ? updated : s)) : [...prev, updated]
+    );
     const newStats = await fetchPresenterStats();
     setStats(newStats);
   }
 
-  async function handleDeleteStand(id: string) {
+  async function handleDeleteStand(id: string | number) {
     await removeStand(id);
-    setStands((prev) => prev.filter((s) => s.id !== id));
+    setStands((prev) => prev.filter((s) => s.id !== Number(id)));
     const newStats = await fetchPresenterStats();
     setStats(newStats);
   }
