@@ -1,0 +1,207 @@
+:root {
+  --cosmic-bg: #030014;
+  --neon-blue: #00d4ff;
+  --neon-white: #e8f4ff;
+  --neon-purple: #6b5bff;
+  --glass: rgba(8, 20, 48, 0.75);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--cosmic-bg);
+  color: var(--neon-white);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+#__next,
+main {
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  touch-action: none;
+}
+
+body[data-modal-open="true"] div[style*="pointer-events"][style*="transform"] {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.neon-text {
+  text-shadow:
+    0 0 8px rgba(0, 212, 255, 0.8),
+    0 0 24px rgba(0, 212, 255, 0.4);
+}
+
+.glass-panel {
+  background: var(--glass);
+  border: 1px solid rgba(0, 212, 255, 0.35);
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 0 20px rgba(0, 212, 255, 0.15),
+    inset 0 0 30px rgba(0, 212, 255, 0.05);
+}
+
+.scroll-cosmic::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-cosmic::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.4);
+  border-radius: 3px;
+}
+
+.font-env-headline {
+  font-family: var(--font-env-headline), "Sora", sans-serif;
+}
+
+.font-env-body {
+  font-family: var(--font-env-body), "Hanken Grotesk", sans-serif;
+}
+
+.font-env-label {
+  font-family: var(--font-env-label), "Space Grotesk", sans-serif;
+}
+
+.lobby-portal-sign {
+  --portal-color: #1292e2;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 7px 12px 9px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--portal-color) 40%, #041147);
+  background: linear-gradient(
+    160deg,
+    rgba(4, 17, 71, 0.94) 0%,
+    rgba(6, 22, 80, 0.88) 100%
+  );
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 4px 16px rgba(4, 17, 71, 0.6),
+    inset 0 1px 0 rgba(247, 247, 247, 0.06);
+  transition:
+    background 0.45s ease,
+    border-color 0.45s ease,
+    box-shadow 0.45s ease,
+    transform 0.45s ease;
+  overflow: hidden;
+}
+
+.lobby-portal-sign--active {
+  border-color: color-mix(in srgb, #1292e2 55%, #a915f2);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--portal-color) 75%, #1292e2) 0%,
+    #1292e2 42%,
+    #a915f2 100%
+  );
+  box-shadow:
+    0 0 32px color-mix(in srgb, #a915f2 50%, transparent),
+    0 0 12px color-mix(in srgb, #1292e2 45%, transparent),
+    inset 0 0 24px rgba(255, 255, 255, 0.12);
+  transform: scale(1.06);
+  animation: lobby-sign-float 2.2s ease-in-out infinite;
+}
+
+.lobby-portal-sign__badge {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--portal-color) 70%, #f7f7f7);
+  transition: color 0.4s ease;
+}
+
+.lobby-portal-sign--active .lobby-portal-sign__badge {
+  color: #f7f7f7;
+  text-shadow: 0 0 12px rgba(247, 247, 247, 0.5);
+}
+
+.lobby-portal-sign__title {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  color: #f7f7f7;
+  transition: color 0.4s ease, text-shadow 0.4s ease;
+}
+
+.lobby-portal-sign--active .lobby-portal-sign__title {
+  color: #ffffff;
+  text-shadow:
+    0 0 14px rgba(255, 255, 255, 0.45),
+    0 0 24px rgba(169, 21, 242, 0.35);
+}
+
+.lobby-portal-sign__shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.18) 50%,
+    transparent 70%
+  );
+  transform: translateX(-130%);
+  animation: lobby-sign-shine 5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.lobby-portal-sign--active .lobby-portal-sign__shine {
+  animation: lobby-sign-shine 1.8s ease-in-out infinite;
+}
+
+.lobby-portal-sign__pulse {
+  position: absolute;
+  inset: -2px;
+  border-radius: 12px;
+  border: 2px solid rgba(247, 247, 247, 0.35);
+  animation: lobby-sign-ring 1.4s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes lobby-sign-float {
+  0%,
+  100% {
+    transform: scale(1.06) translateY(0);
+  }
+  50% {
+    transform: scale(1.06) translateY(-4px);
+  }
+}
+
+@keyframes lobby-sign-shine {
+  0%,
+  40% {
+    transform: translateX(-130%);
+  }
+  60%,
+  100% {
+    transform: translateX(130%);
+  }
+}
+
+@keyframes lobby-sign-ring {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+}

@@ -1,5 +1,8 @@
 "use client";
 
+
+import { notifyMetaversoSessionChanged } from "@/features/metaverso";
+
 import { useState } from "react";
 //para ir al siguiente link
 import Link from "next/link";
@@ -42,6 +45,7 @@ export function LoginForm() {
         localStorage.setItem("user", JSON.stringify(data.user));
 
         console.log(JSON.stringify(data.user, null, 2));
+        notifyMetaversoSessionChanged();
 
         /*
         alerta del explorador de que el login fue exitoso **
