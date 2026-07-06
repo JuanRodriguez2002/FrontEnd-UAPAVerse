@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowUpRight, BookmarkCheck, Heart, SignalHigh } from "lucide-react";
-import type { Stand } from "@/app/types/investors";
+import type { Stand } from "@/features/dashboard-empresa/types/investors";
 
 type FavoriteStandsPanelProps = {
   stands: Stand[];

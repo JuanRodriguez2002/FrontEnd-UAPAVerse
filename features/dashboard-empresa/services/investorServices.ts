@@ -2,8 +2,8 @@ import {
   conversations,
   favoriteStands,
   portfolioProjects,
-} from "@/app/services/mockData";
-import type { MeetingRequest } from "@/app/types/investors";
+} from "@/features/dashboard-empresa/services/mockData";
+import type { MeetingRequest } from "@/features/dashboard-empresa/types/investors";
 
 export async function getInvestorDashboardData() {
   return {

@@ -1,12 +1,12 @@
 "use client";
 
 import { Bell, Building2, CalendarClock, Heart, MessageSquare, Radar, Search, Settings } from "lucide-react";
-import { conversations, favoriteStands } from "@/app/services/mockData";
-import { FavoriteStandsPanel } from "@/app/components/FavoriteStandsPanel";
-import { MessagingPanel } from "@/app/components/MessagingPanel";
-import { PortfolioTracker } from "@/app/components/PortfolioTracker";
-import { QuickRequestForm } from "@/app/components/QuickRequestForm";
-import { Sidebar } from "@/app/components/Sidebar";
+import { conversations, favoriteStands } from "@/features/dashboard-empresa/services/mockData";
+import { FavoriteStandsPanel } from "@/features/dashboard-empresa/components/FavoriteStandsPanel";
+import { MessagingPanel } from "@/features/dashboard-empresa/components/MessagingPanel";
+import { PortfolioTracker } from "@/features/dashboard-empresa/components/PortfolioTracker";
+import { QuickRequestForm } from "@/features/dashboard-empresa/components/QuickRequestForm";
+import { Sidebar } from "@/features/dashboard-empresa/components/Sidebar";
 
 const stats = [
   { label: "Stands guardados", value: "18", icon: Heart },

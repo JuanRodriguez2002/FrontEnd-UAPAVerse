@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { portfolioProjects } from "@/app/services/mockData";
-import type { PortfolioProject } from "@/app/types/investors";
+import { portfolioProjects } from "@/features/dashboard-empresa/services/mockData";
+import type { PortfolioProject } from "@/features/dashboard-empresa/types/investors";
 
 export function usePortfolioProjects(
   initialProjects: PortfolioProject[] = portfolioProjects,

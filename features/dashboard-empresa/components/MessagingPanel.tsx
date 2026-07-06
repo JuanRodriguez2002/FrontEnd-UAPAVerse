@@ -2,7 +2,7 @@
 
 import { MoreVertical, Paperclip, Search, Send, Video } from "lucide-react";
 import { useState } from "react";
-import type { Conversation } from "@/app/types/investors";
+import type { Conversation } from "@/features/dashboard-empresa/types/investors";
 
 type MessagingPanelProps = {
   conversations: Conversation[];

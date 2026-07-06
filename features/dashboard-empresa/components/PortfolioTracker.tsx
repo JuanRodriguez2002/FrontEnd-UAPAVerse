@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2, ChevronsUp, Trash2 } from "lucide-react";
-import { usePortfolioProjects } from "@/app/hooks/usePortfolioProjects";
+import { usePortfolioProjects } from "@/features/dashboard-empresa/hooks/usePortfolioProjects";
 
 export function PortfolioTracker() {
   const { projects, activeProjectId, setActiveProjectId, advanceProject, removeProject } = usePortfolioProjects();

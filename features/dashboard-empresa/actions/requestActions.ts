@@ -1,7 +1,7 @@
 "use server";
 
-import { submitMeetingRequest } from "@/app/services/investorService";
-import type { MeetingRequest } from "@/app/types/investors";
+import { submitMeetingRequest } from "@/features/dashboard-empresa/services/investorServices";
+import type { MeetingRequest } from "@/features/dashboard-empresa/types/investors";
 
 export async function createMeetingRequest(request: MeetingRequest) {
   if (!request.standId || !request.date || !request.message) {

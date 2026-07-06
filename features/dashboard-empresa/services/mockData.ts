@@ -2,7 +2,7 @@ import type {
   Conversation,
   PortfolioProject,
   Stand,
-} from "@/app/types/investors";
+} from "@/features/dashboard-empresa/types/investors";
 
 export const favoriteStands: Stand[] = [
   {

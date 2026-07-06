@@ -2,8 +2,8 @@
 
 import { CalendarDays, CircleDollarSign, Loader2, SendHorizonal } from "lucide-react";
 import { useState, useTransition } from "react";
-import { createMeetingRequest } from "@/app/actions/requestActions";
-import type { Stand } from "@/app/types/investors";
+import { createMeetingRequest } from "@/features/dashboard-empresa/actions/requestActions";
+import type { Stand } from "@/features/dashboard-empresa/types/investors";
 
 type QuickRequestFormProps = {
   stands: Stand[];
